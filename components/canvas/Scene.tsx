@@ -1,12 +1,13 @@
 "use client";
 
 import { Suspense } from "react";
-import { ContactShadows, Sparkles } from "@react-three/drei";
+import { Environment, Lightformer, Sparkles } from "@react-three/drei";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import { CameraRig } from "./CameraRig";
 import { HeroScene } from "./HeroScene";
 import { IndustryTotems } from "./IndustryTotems";
 import { ProjectGallery } from "./ProjectGallery";
+import { Motes, ReflectiveFloor } from "./primitives";
 import type { ProjectRecord } from "@/lib/types";
 
 function ContactOrb({ scroll }: { scroll: number }) {
@@ -16,17 +17,54 @@ function ContactOrb({ scroll }: { scroll: number }) {
   return (
     <group position={[0, t * 0.5, 0]} scale={t}>
       <mesh>
-        <icosahedronGeometry args={[0.8, 1]} />
-        <meshStandardMaterial
-          color="#4A7C59"
-          roughness={0.35}
-          metalness={0.25}
-          emissive="#C9A961"
-          emissiveIntensity={0.9}
+        <icosahedronGeometry args={[0.85, 0]} />
+        <meshPhysicalMaterial
+          color="#A855F7"
+          emissive="#C084FC"
+          emissiveIntensity={0.6}
+          metalness={1}
+          roughness={0.12}
+          iridescence={1}
+          iridescenceIOR={1.6}
+          clearcoat={1}
+          envMapIntensity={1.8}
         />
       </mesh>
-      <pointLight intensity={1.4} color="#C9A961" distance={6} />
+      <pointLight intensity={20} color="#2DD4BF" distance={8} />
     </group>
+  );
+}
+
+/** Local studio lighting baked into an env map — powers glass/metal reflections
+ *  without fetching any remote HDRI. */
+function StudioEnvironment() {
+  return (
+    <Environment resolution={256} frames={1}>
+      <Lightformer
+        intensity={2.4}
+        color="#A855F7"
+        position={[0, 3, -5]}
+        scale={[8, 8, 1]}
+      />
+      <Lightformer
+        intensity={2}
+        color="#2DD4BF"
+        position={[-5, 1, 3]}
+        scale={[5, 5, 1]}
+      />
+      <Lightformer
+        intensity={1.6}
+        color="#F3EAFF"
+        position={[4, 4, 4]}
+        scale={[3, 3, 1]}
+      />
+      <Lightformer
+        intensity={1.2}
+        color="#C084FC"
+        position={[0, -3, 2]}
+        scale={[6, 3, 1]}
+      />
+    </Environment>
   );
 }
 
@@ -39,44 +77,38 @@ export function SceneContent({
 }) {
   return (
     <>
-      <color attach="background" args={["#12280F"]} />
+      <color attach="background" args={["#0B0413"]} />
+      <fog attach="fog" args={["#0B0413", 6, 24]} />
       <CameraRig />
+      <StudioEnvironment />
+
       <Suspense fallback={null}>
         <HeroScene />
         <IndustryTotems />
         <ProjectGallery projects={projects} />
         <ContactOrb scroll={scroll} />
+        <ReflectiveFloor />
       </Suspense>
 
-      {/* Ambient golden fireflies drifting through the whole grove */}
+      <Motes count={40} />
       <Sparkles
-        count={60}
-        scale={[16, 8, 12]}
-        position={[0, 2, 0]}
+        count={70}
+        scale={[18, 9, 13]}
+        position={[0, 2.5, 0]}
         size={3}
         speed={0.3}
-        opacity={0.6}
-        color="#C9A961"
-      />
-
-      {/* Soft grounding shadow beneath the central elements */}
-      <ContactShadows
-        position={[0, -1.18, 0]}
-        opacity={0.5}
-        scale={20}
-        blur={2.6}
-        far={6}
-        color="#0A160A"
+        opacity={0.7}
+        color="#C084FC"
       />
 
       <EffectComposer enableNormalPass={false}>
         <Bloom
-          intensity={0.9}
-          luminanceThreshold={0.35}
-          luminanceSmoothing={0.85}
+          intensity={1.1}
+          luminanceThreshold={0.2}
+          luminanceSmoothing={0.9}
           mipmapBlur
         />
-        <Vignette eskil={false} offset={0.25} darkness={0.75} />
+        <Vignette eskil={false} offset={0.2} darkness={0.85} />
       </EffectComposer>
     </>
   );

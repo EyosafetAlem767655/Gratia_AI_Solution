@@ -6,7 +6,11 @@
       "PowerShell(npm run lint 2>&1)",
       "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
       "PowerShell(Stop-Process -Force -ErrorAction SilentlyContinue)",
-      "Read(//c/Users/Administrator/AppData/Local/Temp/**)"
+      "Read(//c/Users/Administrator/AppData/Local/Temp/**)",
+      "WebSearch",
+      "Bash(node -e \"const sharp=require\\('sharp'\\); sharp\\('public/logo.png'\\).metadata\\(\\).then\\(m=>console.log\\(JSON.stringify\\({width:m.width,height:m.height,channels:m.channels,hasAlpha:m.hasAlpha,format:m.format}\\)\\)\\)\")",
+      "Bash(node \"C:/Users/ADMINI~1/AppData/Local/Temp/claude/c--Users-Administrator-Projects-Gratia-AI-Solutions/1abe593e-5143-4815-826c-70daf41b3783/scratchpad/recolor.mjs\")",
+      "Bash(node scripts/process-logo.mjs)"
     ]
   }
 }

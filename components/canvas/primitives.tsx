@@ -1,28 +1,9 @@
 "use client";
 
 import { useMemo, useRef } from "react";
+import { MeshReflectorMaterial } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-
-export function WoodMaterial({
-  color = "#8B5E3C",
-  roughness = 0.85,
-  metalness = 0.05,
-}: {
-  color?: string;
-  roughness?: number;
-  metalness?: number;
-}) {
-  return (
-    <meshStandardMaterial
-      color={color}
-      roughness={roughness}
-      metalness={metalness}
-    />
-  );
-}
-
-const LEAF_TINTS = ["#A8C5A0", "#C9A961", "#8B5E3C", "#4A7C59"];
 
 // Deterministic, pure pseudo-random in [0,1) — avoids impure Math.random during render.
 function seeded(n: number) {
@@ -30,7 +11,10 @@ function seeded(n: number) {
   return s - Math.floor(s);
 }
 
-export function LeafParticles({ count = 80 }: { count?: number }) {
+const MOTE_TINTS = ["#C084FC", "#2DD4BF", "#A855F7", "#5EEAD4"];
+
+/** Slow-drifting brand-colored specks that give the void a sense of depth. */
+export function Motes({ count = 90 }: { count?: number }) {
   const ref = useRef<THREE.Points>(null);
 
   const { positions, colors, phases } = useMemo(() => {
@@ -39,10 +23,10 @@ export function LeafParticles({ count = 80 }: { count?: number }) {
     const phases = new Float32Array(count);
     const tint = new THREE.Color();
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (seeded(i * 3) - 0.5) * 20;
-      positions[i * 3 + 1] = seeded(i * 3 + 1) * 8 + 1;
+      positions[i * 3] = (seeded(i * 3) - 0.5) * 22;
+      positions[i * 3 + 1] = seeded(i * 3 + 1) * 9 + 0.5;
       positions[i * 3 + 2] = (seeded(i * 3 + 2) - 0.5) * 16;
-      tint.set(LEAF_TINTS[Math.floor(seeded(i + 0.5) * LEAF_TINTS.length)]);
+      tint.set(MOTE_TINTS[Math.floor(seeded(i + 0.5) * MOTE_TINTS.length)]);
       colors[i * 3] = tint.r;
       colors[i * 3 + 1] = tint.g;
       colors[i * 3 + 2] = tint.b;
@@ -53,16 +37,12 @@ export function LeafParticles({ count = 80 }: { count?: number }) {
 
   useFrame((state) => {
     if (!ref.current) return;
-    ref.current.rotation.y = state.clock.elapsedTime * 0.02;
+    ref.current.rotation.y = state.clock.elapsedTime * 0.015;
     const t = state.clock.elapsedTime;
     const pos = ref.current.geometry.attributes.position.array as Float32Array;
     for (let i = 0; i < count; i++) {
-      pos[i * 3 + 1] -= 0.008;
-      // Gentle horizontal sway as leaves fall.
-      pos[i * 3] += Math.sin(t * 0.6 + phases[i]) * 0.0015;
-      if (pos[i * 3 + 1] < 0) {
-        pos[i * 3 + 1] = 8 + Math.random() * 2;
-      }
+      pos[i * 3 + 1] += Math.sin(t * 0.4 + phases[i]) * 0.0012;
+      pos[i * 3] += Math.cos(t * 0.3 + phases[i]) * 0.0009;
     }
     ref.current.geometry.attributes.position.needsUpdate = true;
   });
@@ -82,21 +62,35 @@ export function LeafParticles({ count = 80 }: { count?: number }) {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.1}
+        size={0.09}
         vertexColors
         transparent
-        opacity={0.8}
+        opacity={0.85}
         depthWrite={false}
+        blending={THREE.AdditiveBlending}
       />
     </points>
   );
 }
 
-export function ForestFloor() {
+/** Mirror-like floor that catches the glow of the crystals above it. */
+export function ReflectiveFloor() {
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.2, 0]} receiveShadow>
-      <planeGeometry args={[40, 40, 32, 32]} />
-      <meshStandardMaterial color="#2D4A2A" roughness={1} metalness={0} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.25, 0]}>
+      <planeGeometry args={[60, 60]} />
+      <MeshReflectorMaterial
+        resolution={512}
+        mirror={0.55}
+        blur={[380, 110]}
+        mixBlur={1.1}
+        mixStrength={2.2}
+        roughness={0.85}
+        depthScale={1.1}
+        minDepthThreshold={0.4}
+        maxDepthThreshold={1.3}
+        color="#160A26"
+        metalness={0.55}
+      />
     </mesh>
   );
 }

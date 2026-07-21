@@ -9,25 +9,51 @@ import { useScrollProgress, scrollSectionProgress } from "./scroll-context";
 
 const INDUSTRIES = Object.keys(INDUSTRY_INFO) as Industry[];
 
-function TotemShape({ industry, active }: { industry: Industry; active: number }) {
+// Elegant faceted forms per industry (distinct silhouettes, not literal icons).
+function Geometry({ industry }: { industry: Industry }) {
+  switch (industry) {
+    case "industrial":
+      return <torusKnotGeometry args={[0.4, 0.13, 160, 20]} />;
+    case "financial":
+      return <octahedronGeometry args={[0.62, 0]} />;
+    case "manufacturing":
+      return <icosahedronGeometry args={[0.58, 0]} />;
+    case "realestate":
+      return <dodecahedronGeometry args={[0.55, 0]} />;
+    case "ecommerce":
+      return <torusGeometry args={[0.44, 0.18, 28, 80]} />;
+    default:
+      return <icosahedronGeometry args={[0.55, 0]} />;
+  }
+}
+
+function Jewel({
+  industry,
+  active,
+  accent,
+}: {
+  industry: Industry;
+  active: number;
+  accent: string;
+}) {
   const ref = useRef<THREE.Group>(null);
-  const matRef = useRef<THREE.MeshStandardMaterial>(null);
+  const matRef = useRef<THREE.MeshPhysicalMaterial>(null);
   const [hovered, setHovered] = useState(false);
   const info = INDUSTRY_INFO[industry];
 
   useFrame((state, delta) => {
     if (!ref.current) return;
-    ref.current.rotation.y = state.clock.elapsedTime * 0.25;
-    const base = 0.6 + active * 0.4;
-    const target = base * (hovered ? 1.2 : 1);
+    ref.current.rotation.y = state.clock.elapsedTime * 0.3;
+    ref.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.4) * 0.2;
+    const target = (0.7 + active * 0.35) * (hovered ? 1.22 : 1);
     ref.current.scale.setScalar(
       THREE.MathUtils.damp(ref.current.scale.x, target, 8, delta),
     );
     if (matRef.current) {
-      const targetGlow = active * 0.5 + (hovered ? 1.1 : 0);
+      const glow = 0.15 + active * 0.4 + (hovered ? 0.9 : 0);
       matRef.current.emissiveIntensity = THREE.MathUtils.damp(
         matRef.current.emissiveIntensity,
-        targetGlow,
+        glow,
         8,
         delta,
       );
@@ -48,40 +74,33 @@ function TotemShape({ industry, active }: { industry: Industry; active: number }
       }}
     >
       <mesh castShadow>
-        {info.shape === "gear" && <torusGeometry args={[0.5, 0.18, 8, 16]} />}
-        {info.shape === "chart" && <octahedronGeometry args={[0.65, 0]} />}
-        {info.shape === "factory" && <boxGeometry args={[0.9, 0.7, 0.9]} />}
-        {info.shape === "building" && (
-          <boxGeometry args={[0.5, 1.1, 0.5]} />
-        )}
-        {info.shape === "cart" && <boxGeometry args={[0.8, 0.5, 0.6]} />}
-        <meshStandardMaterial
+        <Geometry industry={industry} />
+        <meshPhysicalMaterial
           ref={matRef}
-          color="#8B5E3C"
-          roughness={0.7}
-          metalness={0.15}
-          emissive="#C9A961"
-          emissiveIntensity={active * 0.5}
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={0.2}
+          metalness={1}
+          roughness={0.12}
+          clearcoat={1}
+          clearcoatRoughness={0.15}
+          iridescence={1}
+          iridescenceIOR={1.6}
+          envMapIntensity={1.6}
         />
       </mesh>
-      {info.shape === "gear" && (
-        <mesh position={[0, 0, 0]}>
-          <cylinderGeometry args={[0.2, 0.2, 0.3, 12]} />
-          <meshStandardMaterial color="#C9A961" metalness={0.3} roughness={0.5} />
-        </mesh>
-      )}
-      {info.shape === "building" && (
-        <>
-          <mesh position={[0.35, 0, 0]}>
-            <boxGeometry args={[0.35, 0.8, 0.35]} />
-            <meshStandardMaterial color="#8B5E3C" roughness={0.8} />
-          </mesh>
-          <mesh position={[-0.35, 0.15, 0]}>
-            <boxGeometry args={[0.3, 0.5, 0.3]} />
-            <meshStandardMaterial color="#8B5E3C" roughness={0.8} />
-          </mesh>
-        </>
-      )}
+      <Text
+        position={[0, -1.05, 0]}
+        fontSize={0.2}
+        color="#F3EAFF"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={2}
+        outlineWidth={0.004}
+        outlineColor="#12091F"
+      >
+        {info.label}
+      </Text>
     </group>
   );
 }
@@ -95,12 +114,13 @@ export function IndustryTotems() {
   return (
     <group>
       <ambientLight intensity={0.4} />
-      <directionalLight position={[3, 6, 2]} intensity={0.9} color="#F4EDE4" />
+      <directionalLight position={[3, 6, 2]} intensity={0.8} color="#F3EAFF" />
       {INDUSTRIES.map((industry, i) => {
         const angle = (i / INDUSTRIES.length) * Math.PI * 2 - Math.PI / 2;
-        const radius = 3.2;
+        const radius = 3.3;
         const lift = Math.max(0, progress - i * 0.08) * 2;
         const active = Math.max(0, 1 - Math.abs(progress * 5 - i));
+        const accent = i % 2 === 0 ? "#A855F7" : "#2DD4BF";
 
         return (
           <group
@@ -111,17 +131,7 @@ export function IndustryTotems() {
               Math.sin(angle) * radius,
             ]}
           >
-            <TotemShape industry={industry} active={active} />
-            <Text
-              position={[0, -1.1, 0]}
-              fontSize={0.22}
-              color="#F4EDE4"
-              anchorX="center"
-              anchorY="middle"
-              maxWidth={2}
-            >
-              {INDUSTRY_INFO[industry].label}
-            </Text>
+            <Jewel industry={industry} active={active} accent={accent} />
           </group>
         );
       })}

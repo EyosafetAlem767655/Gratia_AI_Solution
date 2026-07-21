@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { Resend } from "resend";
-import { requireDb } from "@/lib/db";
+import { hasDatabase, requireDb } from "@/lib/db";
 import { contactSubmissions } from "@/lib/db/schema";
 
 const contactSchema = z.object({
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const data = contactSchema.parse(body);
 
-    if (dbAvailable()) {
+    if (hasDatabase()) {
       const database = requireDb();
       await database.insert(contactSubmissions).values({
         name: data.name,
@@ -57,8 +57,4 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
-}
-
-function dbAvailable() {
-  return Boolean(process.env.DATABASE_URL);
 }

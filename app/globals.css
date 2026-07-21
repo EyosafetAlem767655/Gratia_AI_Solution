@@ -1,15 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --forest-deep: #1b3a1a;
-  --moss-green: #4a7c59;
-  --warm-oak: #8b5e3c;
-  --golden-amber: #c9a961;
-  --bark-brown: #3d2914;
-  --cream-parchment: #f4ede4;
-  --sage-mist: #a8c5a0;
-  --background: var(--forest-deep);
-  --foreground: var(--cream-parchment);
+  /* Violet Nebula palette */
+  --bg-void: #0b0413;
+  --bg-deep: #12091f;
+  --bg-indigo: #1a0b2e;
+  --violet: #a855f7;
+  --violet-bright: #c084fc;
+  --violet-deep: #7c3aed;
+  --teal: #2dd4bf;
+  --teal-bright: #5eead4;
+  --lilac-chrome: #d9c7f0;
+  --text-soft: #f3eaff;
+  --muted-lilac: #b9a8d0;
+  --background: var(--bg-deep);
+  --foreground: var(--text-soft);
 }
 
 @theme inline {
@@ -24,7 +29,19 @@ html {
 }
 
 body {
-  background: var(--background);
+  /* Nebula depth for the reduced-motion / pre-canvas state */
+  background:
+    radial-gradient(
+      1200px 800px at 70% -10%,
+      rgba(168, 85, 247, 0.18),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 700px at 10% 110%,
+      rgba(45, 212, 191, 0.12),
+      transparent 55%
+    ),
+    var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
 }
@@ -36,6 +53,6 @@ h3 {
 }
 
 ::selection {
-  background: var(--moss-green);
-  color: var(--cream-parchment);
+  background: var(--violet);
+  color: var(--text-soft);
 }

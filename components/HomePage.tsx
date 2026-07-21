@@ -14,17 +14,17 @@ export function HomePage() {
     <>
       <Experience projects={projects} />
       <nav className="fixed top-0 z-50 flex w-full items-center justify-between px-6 py-4 backdrop-blur-md">
-        <a href="#hero" className="text-sm font-semibold text-[#C9A961]">
+        <a href="#hero" className="text-sm font-semibold text-[#C084FC]">
           GRATIA AI
         </a>
-        <div className="flex gap-6 text-sm text-[#F4EDE4]/80">
-          <a href="#services" className="hover:text-[#C9A961]">
+        <div className="flex gap-6 text-sm text-[#F3EAFF]/80">
+          <a href="#services" className="hover:text-[#C084FC]">
             Services
           </a>
-          <a href="#projects" className="hover:text-[#C9A961]">
+          <a href="#projects" className="hover:text-[#C084FC]">
             Projects
           </a>
-          <a href="#contact" className="hover:text-[#C9A961]">
+          <a href="#contact" className="hover:text-[#C084FC]">
             Contact
           </a>
         </div>

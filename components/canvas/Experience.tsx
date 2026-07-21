@@ -44,7 +44,7 @@ export function Experience({ projects }: { projects: ProjectRecord[] }) {
   if (reducedMotion) {
     return (
       <div
-        className="fixed inset-0 -z-10 bg-gradient-to-b from-[#1B3A1A] via-[#2D4A2A] to-[#1B3A1A]"
+        className="fixed inset-0 -z-10 bg-gradient-to-b from-[#12091F] via-[#1A0B2E] to-[#0B0413]"
         aria-hidden
       />
     );

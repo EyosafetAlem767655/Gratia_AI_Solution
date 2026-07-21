@@ -44,19 +44,19 @@ export function ContactForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="name" className="mb-1 block text-sm text-[#A8C5A0]">
+        <label htmlFor="name" className="mb-1 block text-sm text-[#B9A8D0]">
           Name
         </label>
         <input
           id="name"
           name="name"
           required
-          className="w-full rounded-lg border border-[#4A7C59]/40 bg-[#1B3A1A]/80 px-4 py-3 text-[#F4EDE4] outline-none focus:border-[#C9A961]"
+          className="w-full rounded-lg border border-[#7C3AED]/40 bg-[#12091F]/80 px-4 py-3 text-[#F3EAFF] outline-none focus:border-[#C084FC]"
           placeholder="Your name"
         />
       </div>
       <div>
-        <label htmlFor="email" className="mb-1 block text-sm text-[#A8C5A0]">
+        <label htmlFor="email" className="mb-1 block text-sm text-[#B9A8D0]">
           Email
         </label>
         <input
@@ -64,24 +64,24 @@ export function ContactForm() {
           name="email"
           type="email"
           required
-          className="w-full rounded-lg border border-[#4A7C59]/40 bg-[#1B3A1A]/80 px-4 py-3 text-[#F4EDE4] outline-none focus:border-[#C9A961]"
+          className="w-full rounded-lg border border-[#7C3AED]/40 bg-[#12091F]/80 px-4 py-3 text-[#F3EAFF] outline-none focus:border-[#C084FC]"
           placeholder="you@company.com"
         />
       </div>
       <div>
-        <label htmlFor="phone" className="mb-1 block text-sm text-[#A8C5A0]">
+        <label htmlFor="phone" className="mb-1 block text-sm text-[#B9A8D0]">
           Phone
         </label>
         <input
           id="phone"
           name="phone"
           type="tel"
-          className="w-full rounded-lg border border-[#4A7C59]/40 bg-[#1B3A1A]/80 px-4 py-3 text-[#F4EDE4] outline-none focus:border-[#C9A961]"
+          className="w-full rounded-lg border border-[#7C3AED]/40 bg-[#12091F]/80 px-4 py-3 text-[#F3EAFF] outline-none focus:border-[#C084FC]"
           placeholder="+1 234 567 8900"
         />
       </div>
       <div>
-        <label htmlFor="message" className="mb-1 block text-sm text-[#A8C5A0]">
+        <label htmlFor="message" className="mb-1 block text-sm text-[#B9A8D0]">
           Message
         </label>
         <textarea
@@ -89,19 +89,19 @@ export function ContactForm() {
           name="message"
           required
           rows={4}
-          className="w-full resize-none rounded-lg border border-[#4A7C59]/40 bg-[#1B3A1A]/80 px-4 py-3 text-[#F4EDE4] outline-none focus:border-[#C9A961]"
+          className="w-full resize-none rounded-lg border border-[#7C3AED]/40 bg-[#12091F]/80 px-4 py-3 text-[#F3EAFF] outline-none focus:border-[#C084FC]"
           placeholder="Tell us about your project..."
         />
       </div>
       <button
         type="submit"
         disabled={status === "loading"}
-        className="w-full rounded-lg bg-[#4A7C59] px-6 py-3 font-medium text-[#F4EDE4] transition hover:bg-[#5a9468] disabled:opacity-50"
+        className="w-full rounded-lg bg-[#7C3AED] px-6 py-3 font-medium text-[#F3EAFF] transition hover:bg-[#8B5CF6] disabled:opacity-50"
       >
         {status === "loading" ? "Sending…" : "Send Message"}
       </button>
       {status === "success" && (
-        <p className="text-center text-sm text-[#A8C5A0]">
+        <p className="text-center text-sm text-[#B9A8D0]">
           Thank you! We&apos;ll be in touch soon.
         </p>
       )}

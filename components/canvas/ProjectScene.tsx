@@ -18,25 +18,30 @@ function ShapeMesh({ config }: { config: SceneConfig }) {
     if (!ref.current) return;
     ref.current.rotation.y += config.rotationSpeed * 0.01;
     ref.current.rotation.x =
-      Math.sin(state.clock.elapsedTime * config.rotationSpeed) * 0.1;
+      Math.sin(state.clock.elapsedTime * config.rotationSpeed) * 0.12;
   });
 
   const shape = config.primaryShape;
 
   return (
     <mesh ref={ref} scale={config.scale} castShadow>
-      {shape === "gear" && <torusGeometry args={[0.5, 0.15, 12, 24]} />}
-      {shape === "building" && <boxGeometry args={[0.6, 1, 0.6]} />}
-      {shape === "chart" && <octahedronGeometry args={[0.55, 0]} />}
-      {shape === "cart" && <boxGeometry args={[0.7, 0.45, 0.5]} />}
-      {shape === "factory" && <boxGeometry args={[0.8, 0.6, 0.8]} />}
-      {shape === "cube" && <boxGeometry args={[0.65, 0.65, 0.65]} />}
-      <meshStandardMaterial
+      {shape === "gear" && <torusKnotGeometry args={[0.4, 0.13, 128, 18]} />}
+      {shape === "building" && <dodecahedronGeometry args={[0.55, 0]} />}
+      {shape === "chart" && <octahedronGeometry args={[0.58, 0]} />}
+      {shape === "cart" && <torusGeometry args={[0.42, 0.17, 24, 64]} />}
+      {shape === "factory" && <icosahedronGeometry args={[0.56, 0]} />}
+      {shape === "cube" && <boxGeometry args={[0.62, 0.62, 0.62]} />}
+      <meshPhysicalMaterial
         color={config.secondaryColor}
-        roughness={0.7}
-        metalness={0.15}
         emissive={config.accentColor}
-        emissiveIntensity={0.25}
+        emissiveIntensity={0.3}
+        metalness={1}
+        roughness={0.14}
+        clearcoat={1}
+        clearcoatRoughness={0.15}
+        iridescence={1}
+        iridescenceIOR={1.5}
+        envMapIntensity={1.4}
       />
     </mesh>
   );
@@ -79,10 +84,12 @@ function MiniParticles({
         />
       </bufferGeometry>
       <pointsMaterial
-        size={type === "coins" ? 0.06 : 0.04}
+        size={type === "coins" ? 0.06 : 0.045}
         color={color}
         transparent
-        opacity={0.8}
+        opacity={0.9}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
       />
     </points>
   );
@@ -92,13 +99,14 @@ export function ProjectScene({ config }: { config: SceneConfig }) {
   return (
     <group>
       <ambientLight intensity={0.5} />
-      <pointLight position={[2, 2, 2]} intensity={0.8} color={config.accentColor} />
+      <pointLight
+        position={[2, 2, 2]}
+        intensity={6}
+        color={config.accentColor}
+        distance={8}
+      />
       <ShapeMesh config={config} />
       <MiniParticles type={config.particleType} color={config.accentColor} />
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.8, 0]}>
-        <circleGeometry args={[1.2, 32]} />
-        <meshStandardMaterial color="#2D4A2A" roughness={1} />
-      </mesh>
     </group>
   );
 }

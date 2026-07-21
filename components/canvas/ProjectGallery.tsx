@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useRef } from "react";
-import { Float, Html } from "@react-three/drei";
+import { Float, Html, RoundedBox } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { ProjectRecord, SceneConfig } from "@/lib/types";
@@ -38,10 +38,16 @@ function ProjectPlaque({
   return (
     <group ref={groupRef} scale={visible}>
       <Float speed={1.5} floatIntensity={0.2}>
-        <mesh castShadow>
-          <boxGeometry args={[2.2, 1.6, 0.12]} />
-          <meshStandardMaterial color="#8B5E3C" roughness={0.85} />
-        </mesh>
+        <RoundedBox args={[2.2, 1.6, 0.12]} radius={0.08} smoothness={4} castShadow>
+          <meshPhysicalMaterial
+            color="#1A0B2E"
+            emissive="#7C3AED"
+            emissiveIntensity={0.25}
+            metalness={0.6}
+            roughness={0.25}
+            clearcoat={1}
+          />
+        </RoundedBox>
         <Html
           transform
           occlude
@@ -49,7 +55,7 @@ function ProjectPlaque({
           position={[0, 0, 0.08]}
           style={{ width: "220px", pointerEvents: "none" }}
         >
-          <div className="rounded-lg border border-[#C9A961]/30 bg-[#1B3A1A]/90 p-3 text-[#F4EDE4] backdrop-blur-sm">
+          <div className="rounded-lg border border-[#C084FC]/30 bg-[#12091F]/90 p-3 text-[#F3EAFF] backdrop-blur-sm">
             <div className="mb-2 flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -57,7 +63,7 @@ function ProjectPlaque({
                 alt={project.companyName}
                 className="h-8 w-8 rounded object-contain bg-white/10"
               />
-              <span className="text-sm font-semibold text-[#C9A961]">
+              <span className="text-sm font-semibold text-[#C084FC]">
                 {project.companyName}
               </span>
             </div>
@@ -72,7 +78,7 @@ function ProjectPlaque({
             <p className="text-xs leading-relaxed opacity-90">
               {project.aiSummary ?? project.description}
             </p>
-            <blockquote className="mt-2 border-l-2 border-[#4A7C59] pl-2 text-xs italic opacity-75">
+            <blockquote className="mt-2 border-l-2 border-[#2DD4BF] pl-2 text-xs italic opacity-75">
               &ldquo;{project.testimonial.slice(0, 120)}
               {project.testimonial.length > 120 ? "…" : ""}&rdquo;
             </blockquote>
@@ -88,19 +94,28 @@ function ProjectPlaque({
   );
 }
 
-function EmptyTotem({ visible }: { visible: number }) {
+function EmptyCrystal({ visible }: { visible: number }) {
+  const ref = useRef<THREE.Mesh>(null);
+  useFrame((state, delta) => {
+    if (ref.current) {
+      ref.current.rotation.y += delta * 0.3;
+      ref.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.4) * 0.2;
+    }
+  });
   return (
     <group scale={visible} position={[0, 0, 0]}>
-      <mesh>
-        <cylinderGeometry args={[0.4, 0.55, 2, 8]} />
-        <meshStandardMaterial color="#8B5E3C" roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 1.3, 0]}>
-        <sphereGeometry args={[0.35, 16, 16]} />
-        <meshStandardMaterial
-          color="#4A7C59"
-          emissive="#4A7C59"
-          emissiveIntensity={0.3}
+      <mesh ref={ref}>
+        <icosahedronGeometry args={[0.7, 0]} />
+        <meshPhysicalMaterial
+          color="#A855F7"
+          emissive="#A855F7"
+          emissiveIntensity={0.4}
+          metalness={1}
+          roughness={0.14}
+          iridescence={1}
+          iridescenceIOR={1.5}
+          clearcoat={1}
+          envMapIntensity={1.5}
         />
       </mesh>
     </group>
@@ -116,9 +131,9 @@ export function ProjectGallery({ projects }: { projects: ProjectRecord[] }) {
   return (
     <group>
       <ambientLight intensity={0.45} />
-      <directionalLight position={[-2, 5, 3]} intensity={0.8} color="#C9A961" />
+      <directionalLight position={[-2, 5, 3]} intensity={0.7} color="#C084FC" />
       {projects.length === 0 ? (
-        <EmptyTotem visible={progress} />
+        <EmptyCrystal visible={progress} />
       ) : (
         projects.map((project, i) => (
           <Suspense key={project.id} fallback={null}>
