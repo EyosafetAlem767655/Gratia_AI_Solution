@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gratia AI Solutions
 
-## Getting Started
+Creative 3D marketing website with Telegram portfolio bot, OpenAI content generation, Neon Postgres, and Vercel deployment.
 
-First, run the development server:
+## Features
+
+- Immersive 3D scroll experience (React Three Fiber) with nature/wood branding
+- Dynamic projects gallery powered by Neon Postgres
+- Admin-only Telegram bot (`/addproject`) to submit client work
+- OpenAI GPT-4o + DALL-E 3 for structuring, images, and 3D scene configs
+- Contact form with email notification
+
+## Local Development
 
 ```bash
+npm install
+cp .env.example .env.local
+# Fill in env vars (DATABASE_URL from Neon, etc.)
+npm run db:push
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deployment (Vercel)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Push to GitHub and import in [Vercel](https://vercel.com)
+2. Add **Neon** integration → auto-sets `DATABASE_URL`
+3. Add **Vercel Blob** storage → sets `BLOB_READ_WRITE_TOKEN`
+4. Set environment variables:
+   - `TELEGRAM_BOT_TOKEN` — from [@BotFather](https://t.me/BotFather)
+   - `TELEGRAM_ADMIN_ID` — your numeric ID from [@userinfobot](https://t.me/userinfobot)
+   - `OPENAI_API_KEY`
+   - `RESEND_API_KEY`
+   - `NEXT_PUBLIC_SITE_URL` — your Vercel URL
+5. Deploy, then run migrations: `npm run db:push` (with DATABASE_URL)
+6. Register Telegram webhook:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+TELEGRAM_BOT_TOKEN=xxx NEXT_PUBLIC_SITE_URL=https://your-site.vercel.app node scripts/setup-webhook.mjs
+```
 
-## Learn More
+## Telegram Bot Commands
 
-To learn more about Next.js, take a look at the following resources:
+- `/start` — Help
+- `/addproject` — Add a client project (company name → logo → description → testimonial)
+- `/cancel` — Cancel current wizard
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Next.js 16 · React Three Fiber · Drizzle · Neon · Vercel Blob · OpenAI · Resend

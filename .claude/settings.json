@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm run build 2>&1)",
+      "PowerShell(npm install @react-three/postprocessing 2>&1)",
+      "PowerShell(npm run lint 2>&1)",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force -ErrorAction SilentlyContinue)",
+      "Read(//c/Users/Administrator/AppData/Local/Temp/**)"
+    ]
+  }
+}

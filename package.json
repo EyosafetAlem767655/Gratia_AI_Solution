@@ -1,23 +1,39 @@
 {
-  "name": "gratia-ai",
+  "name": "gratia-ai-solutions",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
+    "@react-three/drei": "^10.0.7",
+    "@react-three/fiber": "^9.1.2",
+    "@react-three/postprocessing": "^3.0.4",
+    "@vercel/blob": "^1.1.1",
+    "drizzle-orm": "^0.44.2",
+    "gsap": "^3.13.0",
     "next": "16.2.10",
+    "openai": "^5.8.2",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "resend": "^4.6.0",
+    "three": "^0.177.0",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.177.0",
+    "drizzle-kit": "^0.31.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
