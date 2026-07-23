@@ -10,7 +10,14 @@
       "WebSearch",
       "Bash(node -e \"const sharp=require\\('sharp'\\); sharp\\('public/logo.png'\\).metadata\\(\\).then\\(m=>console.log\\(JSON.stringify\\({width:m.width,height:m.height,channels:m.channels,hasAlpha:m.hasAlpha,format:m.format}\\)\\)\\)\")",
       "Bash(node \"C:/Users/ADMINI~1/AppData/Local/Temp/claude/c--Users-Administrator-Projects-Gratia-AI-Solutions/1abe593e-5143-4815-826c-70daf41b3783/scratchpad/recolor.mjs\")",
-      "Bash(node scripts/process-logo.mjs)"
+      "Bash(node scripts/process-logo.mjs)",
+      "PowerShell(npm install -g ui-ux-pro-max-cli 2>&1)",
+      "Bash(pip install *)",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"AI solutions agency B2B tech services enterprise industrial fintech premium dark immersive\" --design-system --variance 6 --motion 6 --density 4 -p \"Gratia AI Solutions\" -f markdown)",
+      "Bash(python scripts/process-logo.py)",
+      "Bash(rm -f app/api/contact/route.ts)",
+      "Bash(rmdir app/api/contact)",
+      "PowerShell(npm install 2>&1)"
     ]
   }
 }

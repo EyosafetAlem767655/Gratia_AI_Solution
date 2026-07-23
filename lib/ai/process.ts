@@ -66,8 +66,8 @@ export async function structureProjectWithAI(input: {
       {
         role: "system",
         content: `You structure portfolio entries for Gratia AI Solutions, a company building AI solutions for industrial, financial, manufacturing, real estate, and e-commerce clients.
-Return JSON with: title, summary (2-3 sentences), industry (one of: industrial, financial, manufacturing, realestate, ecommerce), testimonialHighlight (best quote fragment), displayLayout (card|hero|compact), imagePrompt (for DALL-E, nature/wood aesthetic, abstract 3D visualization matching the project), sceneConfig (archetype, primaryShape, accentColor, secondaryColor, particleType, rotationSpeed, scale).
-Use earthy colors: #4A7C59 moss, #8B5E3C oak, #C9A961 amber, #1B3A1A forest.`,
+Return JSON with: title, summary (2-3 sentences), industry (one of: industrial, financial, manufacturing, realestate, ecommerce), testimonialHighlight (best quote fragment), displayLayout (card|hero|compact), imagePrompt (for DALL-E, premium dark cinematic aesthetic, abstract 3D visualization matching the project), sceneConfig (archetype, primaryShape, accentColor, secondaryColor, particleType, rotationSpeed, scale).
+Use the brand palette: #F59E0B gold, #FBBF24 amber, #8B5CF6 violet, #0F172A navy.`,
       },
       {
         role: "user",
@@ -89,7 +89,7 @@ export async function generateProjectImage(prompt: string): Promise<string> {
 
   const result = await openai.images.generate({
     model: "dall-e-3",
-    prompt: `${prompt}. Style: organic nature meets technology, warm wood tones, moss green accents, cinematic 3D render, no text, no logos.`,
+    prompt: `${prompt}. Style: premium dark cinematic 3D render on deep navy, gold and violet accents, glossy glass and metal, no text, no logos.`,
     size: "1024x1024",
     quality: "standard",
     n: 1,

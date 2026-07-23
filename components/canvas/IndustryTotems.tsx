@@ -97,7 +97,7 @@ function Jewel({
         anchorY="middle"
         maxWidth={2}
         outlineWidth={0.004}
-        outlineColor="#12091F"
+        outlineColor="#0A0F1E"
       >
         {info.label}
       </Text>
@@ -120,7 +120,7 @@ export function IndustryTotems() {
         const radius = 3.3;
         const lift = Math.max(0, progress - i * 0.08) * 2;
         const active = Math.max(0, 1 - Math.abs(progress * 5 - i));
-        const accent = i % 2 === 0 ? "#A855F7" : "#2DD4BF";
+        const accent = i % 2 === 0 ? "#F59E0B" : "#8B5CF6";
 
         return (
           <group

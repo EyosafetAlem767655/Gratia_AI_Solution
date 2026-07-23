@@ -11,7 +11,7 @@ function seeded(n: number) {
   return s - Math.floor(s);
 }
 
-const MOTE_TINTS = ["#C084FC", "#2DD4BF", "#A855F7", "#5EEAD4"];
+const MOTE_TINTS = ["#F59E0B", "#FBBF24", "#A78BFA", "#CBD5E1"];
 
 /** Slow-drifting brand-colored specks that give the void a sense of depth. */
 export function Motes({ count = 90 }: { count?: number }) {
@@ -88,7 +88,7 @@ export function ReflectiveFloor() {
         depthScale={1.1}
         minDepthThreshold={0.4}
         maxDepthThreshold={1.3}
-        color="#160A26"
+        color="#0A0F1E"
         metalness={0.55}
       />
     </mesh>

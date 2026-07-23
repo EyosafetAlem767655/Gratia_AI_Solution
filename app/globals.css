@@ -1,27 +1,34 @@
 @import "tailwindcss";
 
 :root {
-  /* Violet Nebula palette */
-  --bg-void: #0b0413;
-  --bg-deep: #12091f;
-  --bg-indigo: #1a0b2e;
-  --violet: #a855f7;
-  --violet-bright: #c084fc;
-  --violet-deep: #7c3aed;
-  --teal: #2dd4bf;
-  --teal-bright: #5eead4;
-  --lilac-chrome: #d9c7f0;
-  --text-soft: #f3eaff;
-  --muted-lilac: #b9a8d0;
-  --background: var(--bg-deep);
-  --foreground: var(--text-soft);
+  /* Enterprise Gateway — Modern Dark (navy base · gold trust · violet tech accent) */
+  --bg: #0f172a;
+  --bg-deep: #0a0f1e;
+  --surface: #182234;
+  --surface-2: #1e293b;
+  --border: #334155;
+  --primary: #f59e0b;
+  --primary-bright: #fbbf24;
+  --accent: #8b5cf6;
+  --accent-bright: #a78bfa;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --on-primary: #0f172a;
+
+  --background: var(--bg);
+  --foreground: var(--text);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
   --font-sans: var(--font-sans);
-  --font-display: var(--font-display);
+  --font-display: var(--font-sans);
 }
 
 html {
@@ -29,30 +36,48 @@ html {
 }
 
 body {
-  /* Nebula depth for the reduced-motion / pre-canvas state */
+  /* Cinematic ambient light — subtle, not a purple/pink gradient wash */
   background:
     radial-gradient(
-      1200px 800px at 70% -10%,
-      rgba(168, 85, 247, 0.18),
+      900px 600px at 78% -8%,
+      rgba(245, 158, 11, 0.1),
       transparent 60%
     ),
     radial-gradient(
-      900px 700px at 10% 110%,
-      rgba(45, 212, 191, 0.12),
-      transparent 55%
+      800px 620px at 12% 108%,
+      rgba(139, 92, 246, 0.1),
+      transparent 58%
     ),
     var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
 h2,
 h3 {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 ::selection {
-  background: var(--violet);
-  color: var(--text-soft);
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+/* Frosted glass surface used across cards / nav / panels */
+.glass {
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+/* Legibility scrim placed behind section content over the fixed 3D canvas */
+.section-scrim {
+  background: radial-gradient(
+    120% 80% at 50% 40%,
+    color-mix(in srgb, var(--bg) 78%, transparent),
+    transparent 75%
+  );
 }

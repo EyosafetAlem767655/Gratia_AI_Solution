@@ -19,18 +19,18 @@ function ContactOrb({ scroll }: { scroll: number }) {
       <mesh>
         <icosahedronGeometry args={[0.85, 0]} />
         <meshPhysicalMaterial
-          color="#A855F7"
-          emissive="#C084FC"
-          emissiveIntensity={0.6}
+          color="#1E293B"
+          emissive="#F59E0B"
+          emissiveIntensity={0.5}
           metalness={1}
-          roughness={0.12}
+          roughness={0.14}
           iridescence={1}
           iridescenceIOR={1.6}
           clearcoat={1}
-          envMapIntensity={1.8}
+          envMapIntensity={1.6}
         />
       </mesh>
-      <pointLight intensity={20} color="#2DD4BF" distance={8} />
+      <pointLight intensity={16} color="#8B5CF6" distance={8} />
     </group>
   );
 }
@@ -41,26 +41,26 @@ function StudioEnvironment() {
   return (
     <Environment resolution={256} frames={1}>
       <Lightformer
-        intensity={2.4}
-        color="#A855F7"
+        intensity={2.2}
+        color="#F59E0B"
         position={[0, 3, -5]}
         scale={[8, 8, 1]}
       />
       <Lightformer
-        intensity={2}
-        color="#2DD4BF"
+        intensity={1.8}
+        color="#8B5CF6"
         position={[-5, 1, 3]}
         scale={[5, 5, 1]}
       />
       <Lightformer
-        intensity={1.6}
-        color="#F3EAFF"
+        intensity={1.5}
+        color="#F8FAFC"
         position={[4, 4, 4]}
         scale={[3, 3, 1]}
       />
       <Lightformer
-        intensity={1.2}
-        color="#C084FC"
+        intensity={1}
+        color="#FBBF24"
         position={[0, -3, 2]}
         scale={[6, 3, 1]}
       />
@@ -77,8 +77,8 @@ export function SceneContent({
 }) {
   return (
     <>
-      <color attach="background" args={["#0B0413"]} />
-      <fog attach="fog" args={["#0B0413", 6, 24]} />
+      <color attach="background" args={["#0A0F1E"]} />
+      <fog attach="fog" args={["#0A0F1E", 6, 24]} />
       <CameraRig />
       <StudioEnvironment />
 
@@ -90,25 +90,25 @@ export function SceneContent({
         <ReflectiveFloor />
       </Suspense>
 
-      <Motes count={40} />
+      <Motes count={32} />
       <Sparkles
-        count={70}
+        count={45}
         scale={[18, 9, 13]}
         position={[0, 2.5, 0]}
-        size={3}
-        speed={0.3}
-        opacity={0.7}
-        color="#C084FC"
+        size={2.5}
+        speed={0.25}
+        opacity={0.5}
+        color="#F59E0B"
       />
 
       <EffectComposer enableNormalPass={false}>
         <Bloom
-          intensity={1.1}
-          luminanceThreshold={0.2}
+          intensity={0.7}
+          luminanceThreshold={0.28}
           luminanceSmoothing={0.9}
           mipmapBlur
         />
-        <Vignette eskil={false} offset={0.2} darkness={0.85} />
+        <Vignette eskil={false} offset={0.22} darkness={0.9} />
       </EffectComposer>
     </>
   );

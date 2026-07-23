@@ -40,8 +40,8 @@ function ProjectPlaque({
       <Float speed={1.5} floatIntensity={0.2}>
         <RoundedBox args={[2.2, 1.6, 0.12]} radius={0.08} smoothness={4} castShadow>
           <meshPhysicalMaterial
-            color="#1A0B2E"
-            emissive="#7C3AED"
+            color="#182234"
+            emissive="#8B5CF6"
             emissiveIntensity={0.25}
             metalness={0.6}
             roughness={0.25}
@@ -55,7 +55,7 @@ function ProjectPlaque({
           position={[0, 0, 0.08]}
           style={{ width: "220px", pointerEvents: "none" }}
         >
-          <div className="rounded-lg border border-[#C084FC]/30 bg-[#12091F]/90 p-3 text-[#F3EAFF] backdrop-blur-sm">
+          <div className="rounded-lg border border-[#F59E0B]/30 bg-[#0F172A]/90 p-3 text-[#F8FAFC] backdrop-blur-sm">
             <div className="mb-2 flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -63,7 +63,7 @@ function ProjectPlaque({
                 alt={project.companyName}
                 className="h-8 w-8 rounded object-contain bg-white/10"
               />
-              <span className="text-sm font-semibold text-[#C084FC]">
+              <span className="text-sm font-semibold text-[#FBBF24]">
                 {project.companyName}
               </span>
             </div>
@@ -78,7 +78,7 @@ function ProjectPlaque({
             <p className="text-xs leading-relaxed opacity-90">
               {project.aiSummary ?? project.description}
             </p>
-            <blockquote className="mt-2 border-l-2 border-[#2DD4BF] pl-2 text-xs italic opacity-75">
+            <blockquote className="mt-2 border-l-2 border-[#F59E0B] pl-2 text-xs italic opacity-75">
               &ldquo;{project.testimonial.slice(0, 120)}
               {project.testimonial.length > 120 ? "…" : ""}&rdquo;
             </blockquote>
@@ -107,8 +107,8 @@ function EmptyCrystal({ visible }: { visible: number }) {
       <mesh ref={ref}>
         <icosahedronGeometry args={[0.7, 0]} />
         <meshPhysicalMaterial
-          color="#A855F7"
-          emissive="#A855F7"
+          color="#F59E0B"
+          emissive="#F59E0B"
           emissiveIntensity={0.4}
           metalness={1}
           roughness={0.14}
