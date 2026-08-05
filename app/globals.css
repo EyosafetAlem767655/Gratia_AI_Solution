@@ -1,83 +1,498 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   GRATIA AI — "OBSIDIAN FOUNDRY"
+   Obsidian void · liquid chrome · one molten accent.
+   The emblem is brushed silver, so the whole system is metal — colour is
+   rationed to a single molten amber so it reads as heat, not decoration.
+   ========================================================================== */
+
 :root {
-  /* Enterprise Gateway — Modern Dark (navy base · gold trust · violet tech accent) */
-  --bg: #0f172a;
-  --bg-deep: #0a0f1e;
-  --surface: #182234;
-  --surface-2: #1e293b;
-  --border: #334155;
-  --primary: #f59e0b;
-  --primary-bright: #fbbf24;
-  --accent: #8b5cf6;
-  --accent-bright: #a78bfa;
-  --text: #f8fafc;
-  --muted: #94a3b8;
-  --on-primary: #0f172a;
+  /* Void */
+  --void: #04060a;
+  --ink: #070a10;
+  --ink-2: #0b0f17;
+
+  /* Graphite surfaces */
+  --surface: #0e131c;
+  --surface-2: #141a25;
+  --surface-3: #1b2330;
+  --line: #232c3a;
+  --line-soft: #1a212c;
+
+  /* Chrome ramp — lifted straight off the emblem */
+  --chrome-100: #f4f8fc;
+  --chrome-200: #dbe4ee;
+  --chrome-300: #b3c1d1;
+  --chrome-400: #8496ab;
+  --chrome-500: #5d6d80;
+  --chrome-600: #3d4959;
+
+  /* Molten — the only saturated colour in the system */
+  --molten: #ff9d2e;
+  --molten-hot: #ffc861;
+  --molten-deep: #d4620d;
+
+  /* Semantic */
+  --bg: var(--void);
+  --fg: var(--chrome-100);
+  --fg-muted: var(--chrome-400);
+  --fg-dim: var(--chrome-500);
+  --accent: var(--molten);
+  --on-accent: #140a02;
+
+  /* Rhythm */
+  --gutter: clamp(1.25rem, 4vw, 4rem);
+  --section-y: clamp(6rem, 12vw, 11rem);
+  --radius: 4px;
+  --radius-lg: 10px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
   --background: var(--bg);
-  --foreground: var(--text);
+  --foreground: var(--fg);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-accent: var(--accent);
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-void: var(--void);
+  --color-ink: var(--ink);
   --color-surface: var(--surface);
-  --color-border: var(--border);
-  --color-muted: var(--muted);
-  --font-sans: var(--font-sans);
-  --font-display: var(--font-sans);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-chrome: var(--chrome-200);
+  --color-chrome-dim: var(--chrome-400);
+  --color-molten: var(--molten);
+  --color-molten-hot: var(--molten-hot);
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  min-width: 0;
 }
 
 html {
   scroll-behavior: smooth;
+  background: var(--void);
+  /* The fixed WebGL canvas sits behind everything; never bounce past it. */
+  overscroll-behavior-y: none;
 }
 
 body {
-  /* Cinematic ambient light — subtle, not a purple/pink gradient wash */
-  background:
-    radial-gradient(
-      900px 600px at 78% -8%,
-      rgba(245, 158, 11, 0.1),
-      transparent 60%
-    ),
-    radial-gradient(
-      800px 620px at 12% 108%,
-      rgba(139, 92, 246, 0.1),
-      transparent 58%
-    ),
-    var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--void);
+  color: var(--fg);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "ss01";
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 h1,
 h2,
-h3 {
-  font-family: var(--font-sans), system-ui, sans-serif;
-  letter-spacing: -0.02em;
+h3,
+h4 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  letter-spacing: -0.035em;
+  line-height: 1.03;
+  text-wrap: balance;
 }
 
 ::selection {
-  background: var(--primary);
-  color: var(--on-primary);
+  background: var(--molten);
+  color: var(--on-accent);
 }
 
-/* Frosted glass surface used across cards / nav / panels */
-.glass {
-  background: color-mix(in srgb, var(--surface) 62%, transparent);
-  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-  backdrop-filter: blur(14px);
+:focus-visible {
+  outline: 2px solid var(--molten);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
-/* Legibility scrim placed behind section content over the fixed 3D canvas */
-.section-scrim {
-  background: radial-gradient(
-    120% 80% at 50% 40%,
-    color-mix(in srgb, var(--bg) 78%, transparent),
-    transparent 75%
+/* Scrollbar — thin graphite, molten thumb */
+::-webkit-scrollbar {
+  width: 9px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ink);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--chrome-600);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--molten-deep);
+}
+
+/* ============================================================================
+   Type utilities
+   ========================================================================== */
+
+.font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
+.font-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+/* Machine-stamped micro label used for every eyebrow and tag on the site. */
+.tag {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+/* Polished-metal text. Animated so headlines catch a slow specular sweep.
+   Named `chrome-type` rather than `text-chrome` so it can't collide with the
+   Tailwind colour utility generated from `--color-chrome`.
+
+   The `[data-word]` selector matters: Blink will not clip a background to text
+   that lives inside an inline-block descendant, and RevealText wraps every word
+   in one to animate it. Without the second selector, split headlines render
+   completely invisible. */
+.chrome-type,
+.chrome-type [data-word] {
+  /* Deliberately shallow. RevealText gives every word its own gradient box, so
+     any stop dark enough to look dramatic on one long headline turns a short
+     word into an unreadable grey smudge. */
+  background-image: linear-gradient(
+    100deg,
+    var(--chrome-300) 0%,
+    var(--chrome-100) 28%,
+    var(--chrome-200) 48%,
+    var(--chrome-100) 70%,
+    var(--chrome-300) 100%
   );
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: chrome-sweep 9s linear infinite;
+}
+
+.molten-type,
+.molten-type [data-word] {
+  background-image: linear-gradient(
+    100deg,
+    var(--molten) 0%,
+    var(--molten-hot) 40%,
+    var(--molten) 70%,
+    var(--molten-hot) 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: chrome-sweep 7s linear infinite;
+}
+
+/* Outline display type — used for the oversized footer wordmark. */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--chrome-600);
+}
+
+@keyframes chrome-sweep {
+  to {
+    background-position: -260% 0;
+  }
+}
+
+/* ============================================================================
+   Surfaces
+   ========================================================================== */
+
+/* Frosted graphite panel with a hairline top highlight, like brushed metal
+   catching a studio light. */
+.panel {
+  position: relative;
+  /* Opaque enough to hold small type against a live particle field behind it;
+     the blur alone is not sufficient once the scene is bright. */
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  border: 1px solid var(--line-soft);
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--chrome-200) 34%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* Cursor-tracked spotlight. Cards set --mx/--my in JS; the glow is pure CSS. */
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, 0%),
+    color-mix(in srgb, var(--molten) 70%, transparent),
+    transparent 65%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out);
+  pointer-events: none;
+}
+
+.spotlight:hover::after,
+.spotlight:focus-within::after {
+  opacity: 1;
+}
+
+/* Inner wash that follows the same pointer position. */
+.spotlight-wash {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    300px circle at var(--mx, 50%) var(--my, 0%),
+    color-mix(in srgb, var(--molten) 9%, transparent),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.45s var(--ease-out);
+  pointer-events: none;
+}
+
+.spotlight:hover .spotlight-wash {
+  opacity: 1;
+}
+
+/* Hairline rule that fades at both ends. */
+.hairline {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--line) 15%,
+    var(--line) 85%,
+    transparent
+  );
+}
+
+/* ============================================================================
+   Buttons
+   ========================================================================== */
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.9rem 1.6rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    color 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out),
+    box-shadow 0.4s var(--ease-out);
+  min-height: 46px;
+}
+
+.btn-molten {
+  background: var(--molten);
+  color: var(--on-accent);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--molten) 45%, transparent);
+}
+
+.btn-molten:hover {
+  box-shadow: 0 10px 44px -8px color-mix(in srgb, var(--molten) 62%, transparent);
+}
+
+/* Specular bar that wipes across the button on hover. */
+.btn-molten::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.7s var(--ease-out);
+}
+
+.btn-molten:hover::after {
+  transform: translateX(120%);
+}
+
+.btn-ghost {
+  border: 1px solid var(--line);
+  color: var(--chrome-200);
+  background: color-mix(in srgb, var(--surface) 40%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.btn-ghost:hover {
+  border-color: color-mix(in srgb, var(--chrome-300) 55%, transparent);
+  color: var(--chrome-100);
+}
+
+/* ============================================================================
+   Atmosphere — grain + scanlines over the whole page
+   ========================================================================== */
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.2;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+.scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  pointer-events: none;
+  /* Barely there on purpose: at any strength you can actually notice, this
+     lands stripes across body copy and blown-out buttons. */
+  opacity: 0.5;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0 3px,
+    rgba(0, 0, 0, 0.16) 3px 4px
+  );
+}
+
+/* Legibility wash between the live scene and section copy.
+   Tuned to roughly half opacity at the centre: enough to hold contrast on body
+   text, light enough that the forge still reads through it. Anything heavier
+   and the 3D layer may as well not be there. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    120% 78% at 50% 50%,
+    color-mix(in srgb, var(--void) 66%, transparent) 0%,
+    color-mix(in srgb, var(--void) 40%, transparent) 48%,
+    transparent 82%
+  );
+}
+
+/* Content-dense sections need more cover than the hero does. */
+.scrim-dense {
+  background: radial-gradient(
+    125% 85% at 50% 50%,
+    color-mix(in srgb, var(--void) 88%, transparent) 0%,
+    color-mix(in srgb, var(--void) 66%, transparent) 55%,
+    color-mix(in srgb, var(--void) 20%, transparent) 92%
+  );
+}
+
+/* ============================================================================
+   Marquee
+   ========================================================================== */
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-duration, 42s) linear infinite;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Hero scroll cue — a spark falling down a hairline. */
+@keyframes cue {
+  0% {
+    transform: translateY(-100%);
+  }
+  60%,
+  100% {
+    transform: translateY(320%);
+  }
+}
+
+/* ============================================================================
+   Reveal — the base state Reveal.tsx animates away from. Declared in CSS so
+   content never flashes before GSAP boots.
+   ========================================================================== */
+
+[data-reveal] {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.no-motion [data-reveal] {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* ============================================================================
+   Reduced motion — kill every ambient loop, keep every layout.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .chrome-type,
+  .molten-type,
+  .marquee-track {
+    animation: none;
+  }
+
+  .chrome-type {
+    background-position: 30% 0;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

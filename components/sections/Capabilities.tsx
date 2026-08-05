@@ -1,0 +1,163 @@
+import { Reveal, RevealText } from "@/components/ui/Reveal";
+import { Spotlight } from "@/components/ui/Spotlight";
+import { INDUSTRY_INFO, type Industry, type PrimaryShape } from "@/lib/types";
+
+const industries = Object.keys(INDUSTRY_INFO) as Industry[];
+
+const ICON_PATHS: Record<PrimaryShape, string> = {
+  gear: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z",
+  chart: "M23 6l-9.5 9.5-5-5L1 18 M17 6h6v6",
+  factory: "M4 21V8l5 3.5V8l5 3.5V8l5 3.5V21H4z M8 21v-4 M12 21v-4 M16 21v-4",
+  building:
+    "M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17 M3 21h18 M9.5 7h.01 M14 7h.01 M9.5 11h.01 M14 11h.01 M9.5 15h.01 M14 15h.01",
+  cart: "M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2z M18 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2z M2 3h2l2.4 12.4a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H5",
+  cube: "M12 2 3 7v10l9 5 9-5V7z M3 7l9 5 9-5 M12 12v10",
+};
+
+const SPARK =
+  "M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z M19 15l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6z";
+
+function Icon({ d }: { d: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5"
+      aria-hidden
+    >
+      <path d={d} />
+    </svg>
+  );
+}
+
+/**
+ * Asymmetric bento: the first and last cells run double-width on large
+ * screens, which breaks the "six identical boxes" rhythm that makes most
+ * capability grids forgettable.
+ */
+const SPANS = [
+  "lg:col-span-2",
+  "lg:col-span-1",
+  "lg:col-span-1",
+  "lg:col-span-1",
+  "lg:col-span-1",
+] as const;
+
+export function Capabilities() {
+  return (
+    <section
+      id="capabilities"
+      className="relative px-[var(--gutter)] py-[var(--section-y)]"
+    >
+      <div className="scrim scrim-dense" aria-hidden />
+
+      <div className="relative z-10 mx-auto max-w-[80rem]">
+        <header className="grid grid-cols-12 items-end gap-y-6">
+          <div className="col-span-12 lg:col-span-7">
+            <Reveal y={16}>
+              <span className="tag">01 — Capabilities</span>
+            </Reveal>
+            <RevealText
+              as="h2"
+              text="Engineered for your industry, not adapted to it."
+              className="chrome-type mt-5 block max-w-3xl text-[clamp(2rem,4.6vw,3.8rem)] font-semibold"
+            />
+          </div>
+          <Reveal delay={0.2} className="col-span-12 lg:col-span-5">
+            <p className="max-w-md text-chrome-dim lg:ml-auto">
+              Every sector has its own data, its own constraints, and its own
+              cost of being wrong. We tailor the models, the tooling and the
+              deployment to yours.
+            </p>
+          </Reveal>
+        </header>
+
+        <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {industries.map((key, i) => {
+            const info = INDUSTRY_INFO[key];
+            return (
+              <Reveal
+                key={key}
+                delay={i * 0.06}
+                y={30}
+                className={SPANS[i] ?? "lg:col-span-1"}
+              >
+                <Spotlight
+                  as="article"
+                  className="panel group h-full rounded-[10px] p-7 transition-colors duration-500 hover:border-[#2b3746]"
+                >
+                  <div className="relative flex h-full flex-col">
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="flex h-11 w-11 items-center justify-center rounded border border-[#232c3a] bg-[#0b0f17] text-molten transition-colors duration-500 group-hover:border-molten/50">
+                        <Icon d={ICON_PATHS[info.shape]} />
+                      </span>
+                      <span className="tag text-[0.65rem]">{info.code}</span>
+                    </div>
+
+                    <h3 className="mt-7 font-display text-2xl font-semibold text-chrome">
+                      {info.label}
+                    </h3>
+                    <p className="mt-3 max-w-md text-sm leading-relaxed text-chrome-dim">
+                      {info.description}
+                    </p>
+
+                    <ul className="mt-auto flex flex-wrap gap-2 pt-7">
+                      {info.ships.map((ship) => (
+                        <li
+                          key={ship}
+                          className="rounded-full border border-[#1f2733] px-3 py-1 font-mono text-[0.68rem] text-[#8496ab] transition-colors duration-500 group-hover:border-[#2b3746] group-hover:text-chrome"
+                        >
+                          {ship}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </Spotlight>
+              </Reveal>
+            );
+          })}
+
+          <Reveal delay={0.3} y={30} className="lg:col-span-1">
+            <Spotlight
+              as="article"
+              className="group h-full rounded-[10px] border border-dashed border-[#242f3d] bg-[#0b0f17]/40 p-7 backdrop-blur-md transition-colors duration-500 hover:border-molten/40"
+            >
+              <div className="relative flex h-full flex-col">
+                <div className="flex items-start justify-between gap-4">
+                  <span className="flex h-11 w-11 items-center justify-center rounded border border-[#232c3a] bg-[#0b0f17] text-chrome">
+                    <Icon d={SPARK} />
+                  </span>
+                  <span className="tag text-[0.65rem]">ANY-06</span>
+                </div>
+                <h3 className="mt-7 font-display text-2xl font-semibold text-chrome">
+                  Everything else
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-chrome-dim">
+                  Outside these five? We design bespoke architectures for
+                  problems that don&apos;t fit a category yet.
+                </p>
+                <a
+                  href="#contact"
+                  data-cursor="link"
+                  className="mt-auto inline-flex items-center gap-2 pt-6 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-molten"
+                >
+                  Talk it through
+                  <span
+                    aria-hidden
+                    className="transition-transform duration-500 group-hover:translate-x-1"
+                  >
+                    →
+                  </span>
+                </a>
+              </div>
+            </Spotlight>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}

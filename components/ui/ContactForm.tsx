@@ -1,8 +1,14 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState, type FormEvent } from "react";
 
 const CONTACT_EMAIL = "eyosafetalem@gmail.com";
+
+const FIELD =
+  "peer w-full rounded border border-[#1f2733] bg-[#04060a]/70 px-4 pb-3 pt-6 text-[15px] text-chrome outline-none transition-colors duration-300 placeholder:text-transparent focus:border-molten";
+
+const LABEL =
+  "pointer-events-none absolute left-4 top-4 origin-left font-mono text-[0.7rem] uppercase tracking-[0.16em] text-[#5d6d80] transition-all duration-300 peer-focus:top-2 peer-focus:text-[0.6rem] peer-focus:text-molten peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-[0.6rem]";
 
 export function ContactForm() {
   const [sent, setSent] = useState(false);
@@ -10,103 +16,106 @@ export function ContactForm() {
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
-    const name = (form.elements.namedItem("name") as HTMLInputElement).value;
-    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
-    const phone = (form.elements.namedItem("phone") as HTMLInputElement).value;
-    const message = (
-      form.elements.namedItem("message") as HTMLTextAreaElement
-    ).value;
+    const value = (name: string) =>
+      (form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement)
+        .value;
 
-    const subject = `New enquiry from ${name}`;
+    const subject = `New enquiry from ${value("name")}`;
     const body = [
-      `Name: ${name}`,
-      `Email: ${email}`,
-      `Phone: ${phone || "—"}`,
+      `Name: ${value("name")}`,
+      `Email: ${value("email")}`,
+      `Company: ${value("company") || "—"}`,
+      `Phone: ${value("phone") || "—"}`,
       "",
-      message,
+      value("message"),
     ].join("\n");
 
-    const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+    // Opens the visitor's own mail client with everything prefilled — no
+    // server, no third-party form service, nothing to leak.
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
       subject,
     )}&body=${encodeURIComponent(body)}`;
-
-    // Opens the visitor's own email app with everything prefilled.
-    window.location.href = mailto;
     setSent(true);
   }
 
-  const field =
-    "w-full rounded-lg border border-[#334155] bg-[#0F172A]/70 px-4 py-3 text-[#F8FAFC] placeholder-[#64748B] outline-none transition focus:border-[#F59E0B] focus:ring-2 focus:ring-[#F59E0B]/30";
-  const label = "mb-1.5 block text-sm font-medium text-[#CBD5E1]";
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div>
-          <label htmlFor="name" className={label}>
-            Name
-          </label>
-          <input
-            id="name"
-            name="name"
-            required
-            autoComplete="name"
-            className={field}
-            placeholder="Your name"
-          />
-        </div>
-        <div>
-          <label htmlFor="email" className={label}>
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            className={field}
-            placeholder="you@company.com"
-          />
-        </div>
-      </div>
-      <div>
-        <label htmlFor="phone" className={label}>
-          Phone <span className="text-[#64748B]">(optional)</span>
-        </label>
-        <input
-          id="phone"
-          name="phone"
-          type="tel"
-          autoComplete="tel"
-          className={field}
-          placeholder="+1 234 567 8900"
+    <form onSubmit={handleSubmit} className="space-y-3.5">
+      <div className="grid gap-3.5 sm:grid-cols-2">
+        <Field id="name" label="Name" autoComplete="name" required />
+        <Field
+          id="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          required
         />
       </div>
-      <div>
-        <label htmlFor="message" className={label}>
-          How can we help?
-        </label>
+
+      <div className="grid gap-3.5 sm:grid-cols-2">
+        <Field id="company" label="Company" autoComplete="organization" />
+        <Field id="phone" label="Phone" type="tel" autoComplete="tel" />
+      </div>
+
+      <div className="relative">
         <textarea
           id="message"
           name="message"
           required
-          rows={4}
-          className={`${field} resize-none`}
-          placeholder="Tell us about your project, industry, and goals…"
+          rows={5}
+          placeholder=" "
+          className={`${FIELD} resize-none`}
         />
+        <label htmlFor="message" className={LABEL}>
+          What are you trying to build?
+        </label>
       </div>
-      <button
-        type="submit"
-        className="w-full cursor-pointer rounded-lg bg-[#F59E0B] px-6 py-3 font-semibold text-[#0F172A] transition hover:bg-[#FBBF24] active:scale-[0.99]"
-      >
-        Compose Email
+
+      <button type="submit" className="btn btn-molten w-full">
+        Send the brief
       </button>
-      <p className="text-center text-xs text-[#94A3B8]" aria-live="polite">
+
+      <p
+        className="pt-1 text-center font-mono text-[0.7rem] leading-relaxed text-[#5d6d80]"
+        aria-live="polite"
+      >
         {sent
-          ? "Your email app should have opened with the message ready to send."
-          : `This opens your email app with a message to ${CONTACT_EMAIL}.`}
+          ? "Your mail client should have opened with the brief ready to send."
+          : `Opens your mail client, addressed to ${CONTACT_EMAIL}`}
       </p>
     </form>
+  );
+}
+
+function Field({
+  id,
+  label,
+  type = "text",
+  required = false,
+  autoComplete,
+}: {
+  id: string;
+  label: string;
+  type?: string;
+  required?: boolean;
+  autoComplete?: string;
+}) {
+  return (
+    <div className="relative">
+      <input
+        id={id}
+        name={id}
+        type={type}
+        required={required}
+        autoComplete={autoComplete}
+        // A single space keeps :placeholder-shown meaningful, which is what
+        // drives the floating label without any JavaScript.
+        placeholder=" "
+        className={FIELD}
+      />
+      <label htmlFor={id} className={LABEL}>
+        {label}
+        {required && <span className="text-molten"> *</span>}
+      </label>
+    </div>
   );
 }

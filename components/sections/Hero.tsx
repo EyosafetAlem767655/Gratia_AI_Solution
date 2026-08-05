@@ -1,73 +1,135 @@
-import Image from "next/image";
-import { Reveal } from "@/components/ui/Reveal";
+import { Magnetic } from "@/components/ui/Magnetic";
+import { Marquee } from "@/components/ui/Marquee";
+import { Reveal, RevealText } from "@/components/ui/Reveal";
+import { INDUSTRY_INFO, type Industry } from "@/lib/types";
+
+const industries = Object.keys(INDUSTRY_INFO) as Industry[];
 
 export function Hero() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-6 py-28 text-center"
+      className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden pt-32"
     >
-      {/* Legibility scrim over the fixed 3D canvas */}
-      <div className="section-scrim pointer-events-none absolute inset-0" />
+      <div className="scrim" aria-hidden />
 
-      <div className="relative z-10 flex w-full max-w-3xl flex-col items-center">
-        <Reveal y={16}>
-          <div className="relative">
-            <div className="absolute inset-0 -z-10 blur-2xl [background:radial-gradient(circle,rgba(245,158,11,0.22),transparent_65%)]" />
-            <Image
-              src="/logo.png"
-              alt="Gratia AI Solutions"
-              width={240}
-              height={228}
-              className="mx-auto h-auto w-[180px] sm:w-[220px]"
-              priority
+      <div className="relative z-10 mx-auto grid w-full max-w-[80rem] flex-1 grid-cols-12 items-center gap-y-10 px-[var(--gutter)]">
+        <div className="col-span-12 lg:col-span-7 xl:col-span-6">
+          <Reveal y={14} className="flex items-center gap-3">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-molten opacity-70" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-molten" />
+            </span>
+            <span className="tag">Enterprise AI · Engineered</span>
+          </Reveal>
+
+          <h1 className="mt-7 text-[clamp(3rem,9.5vw,7.5rem)] font-semibold">
+            <RevealText
+              as="span"
+              text="Intelligence,"
+              className="chrome-type block"
+              delay={0.05}
             />
-          </div>
-        </Reveal>
-
-        <Reveal delay={0.1}>
-          <p className="mt-8 text-xs font-semibold uppercase tracking-[0.3em] text-[#F59E0B]">
-            Enterprise AI · Engineered
-          </p>
-        </Reveal>
-
-        <Reveal delay={0.18}>
-          <h1 className="mt-4 text-4xl font-bold leading-[1.05] text-[#F8FAFC] sm:text-5xl lg:text-6xl">
-            Production AI for the industries that run the world
+            <RevealText
+              as="span"
+              text="forged."
+              className="molten-type block"
+              delay={0.18}
+            />
           </h1>
-        </Reveal>
 
-        <Reveal delay={0.28}>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-[#94A3B8]">
-            We design, build, and ship intelligent systems for industrial,
-            financial, manufacturing, real-estate, and e-commerce companies —
-            from prototype to production.
-          </p>
-        </Reveal>
+          <Reveal delay={0.45} y={26}>
+            <p className="mt-8 max-w-xl text-lg leading-relaxed text-chrome-dim">
+              We design, build and ship production AI for the industries that
+              run the world — industrial, financial, manufacturing, real estate
+              and e-commerce. From the first prototype to the system that runs
+              on Monday morning.
+            </p>
+          </Reveal>
 
-        <Reveal delay={0.38}>
-          <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">
-            <a
-              href="#contact"
-              className="rounded-lg bg-[#F59E0B] px-7 py-3 font-semibold text-[#0F172A] transition hover:bg-[#FBBF24]"
-            >
-              Book a consultation
-            </a>
-            <a
-              href="#services"
-              className="rounded-lg border border-[#334155] bg-[#182234]/60 px-7 py-3 font-medium text-[#F8FAFC] backdrop-blur transition hover:border-[#8B5CF6] hover:text-white"
-            >
-              Explore solutions
-            </a>
-          </div>
-        </Reveal>
+          <Reveal delay={0.58} y={22}>
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Magnetic>
+                <a href="#contact" className="btn btn-molten" data-cursor="link">
+                  Start a project
+                  <Arrow />
+                </a>
+              </Magnetic>
+              <a href="#work" className="btn btn-ghost" data-cursor="link">
+                See the work
+              </a>
+            </div>
+          </Reveal>
+        </div>
 
-        <Reveal delay={0.5}>
-          <p className="mt-12 text-xs uppercase tracking-[0.2em] text-[#64748B]">
-            Industrial · Financial · Manufacturing · Real Estate · E-commerce
-          </p>
+        {/* Instrument readout. The rest of this column is deliberately empty so
+            the forge in the WebGL layer has somewhere to live. */}
+        <Reveal
+          delay={0.8}
+          y={0}
+          className="col-span-12 hidden lg:col-span-5 lg:block xl:col-span-6"
+        >
+          <dl className="ml-auto w-fit space-y-4 border-l border-[#1a212c] pl-6">
+            {[
+              ["Practice", "Applied AI systems"],
+              ["Engagement", "Prototype → Production"],
+              ["Sectors", "Five, plus bespoke"],
+            ].map(([term, value]) => (
+              <div key={term}>
+                <dt className="tag">{term}</dt>
+                <dd className="mt-1 font-mono text-sm text-chrome">{value}</dd>
+              </div>
+            ))}
+          </dl>
         </Reveal>
       </div>
+
+      <div className="relative z-10 w-full">
+        <div className="hairline" />
+        <Marquee
+          className="py-4 text-[0.7rem] uppercase tracking-[0.28em] text-[#5d6d80]"
+          items={[
+            ...industries.map((key) => INDUSTRY_INFO[key].label),
+            "Prototype → Production",
+            "Evaluation & Guardrails",
+            "Bespoke Architectures",
+          ]}
+        />
+        <div className="hairline" />
+      </div>
+
+      <ScrollCue />
     </section>
+  );
+}
+
+function ScrollCue() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute bottom-28 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 lg:flex"
+    >
+      <span className="tag text-[0.6rem]">Scroll</span>
+      <span className="relative block h-10 w-px overflow-hidden bg-[#1a212c]">
+        <span className="absolute inset-x-0 top-0 h-4 animate-[cue_2.2s_ease-in-out_infinite] bg-molten" />
+      </span>
+    </div>
+  );
+}
+
+function Arrow() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
   );
 }
