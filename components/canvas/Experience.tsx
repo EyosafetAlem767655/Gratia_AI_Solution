@@ -33,10 +33,10 @@ function hasWebGL() {
  */
 function StillFrame() {
   return (
-    <div className="fixed inset-0 z-0 bg-void" aria-hidden>
-      <div className="absolute inset-0 [background:radial-gradient(60%_45%_at_50%_38%,rgba(255,157,46,0.14),transparent_70%)]" />
-      <div className="absolute inset-0 [background:radial-gradient(80%_50%_at_50%_120%,rgba(120,150,180,0.1),transparent_65%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-1/2 opacity-[0.14] [background-image:linear-gradient(rgba(160,180,200,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(160,180,200,0.6)_1px,transparent_1px)] [background-size:60px_60px] [mask-image:linear-gradient(to_top,black,transparent)]" />
+    <div className="fixed inset-0 z-0 bg-deep" aria-hidden>
+      <div className="absolute inset-0 [background:radial-gradient(58%_44%_at_50%_38%,rgba(195,245,60,0.13),transparent_70%)]" />
+      <div className="absolute inset-0 [background:radial-gradient(80%_50%_at_50%_118%,rgba(31,214,155,0.09),transparent_66%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-1/2 opacity-[0.12] [background-image:linear-gradient(rgba(150,200,160,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(150,200,160,0.6)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:linear-gradient(to_top,black,transparent)]" />
     </div>
   );
 }
@@ -86,10 +86,6 @@ export function Experience({ projectCount }: { projectCount: number }) {
       sceneState.velocity = next - lastScroll;
       lastScroll = next;
       sceneState.scroll = next;
-      document.documentElement.style.setProperty(
-        "--scroll",
-        next.toFixed(4),
-      );
       ticking = false;
     };
 
@@ -136,8 +132,10 @@ export function Experience({ projectCount }: { projectCount: number }) {
     // the body background, which would hide the whole scene.
     <div className="fixed inset-0 z-0">
       <Canvas
-        camera={{ position: [0, 0.55, 8.4], fov: 46, near: 0.1, far: 120 }}
-        dpr={[1, sceneState.quality === "high" ? 1.75 : 1.25]}
+        camera={{ position: [0, 0.6, 8.4], fov: 46, near: 0.1, far: 140 }}
+        // Ceiling, not a target: PerformanceMonitor inside the scene lowers
+        // this the moment real frame times say it should.
+        dpr={[1, sceneState.quality === "high" ? 1.5 : 1.15]}
         gl={{
           antialias: false,
           alpha: false,

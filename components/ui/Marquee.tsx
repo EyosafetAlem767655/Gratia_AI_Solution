@@ -20,7 +20,7 @@ export function Marquee({
         <span key={i} className="flex items-center">
           <span className="px-6">{item}</span>
           <span
-            className="h-1 w-1 rotate-45 bg-[#3d4959]"
+            className="h-1 w-1 rotate-45 bg-[#2a5138]"
             aria-hidden
           />
         </span>
@@ -39,8 +39,8 @@ export function Marquee({
       </div>
 
       {/* Feather both ends into the background. */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-void to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-void to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-deep to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-deep to-transparent" />
     </div>
   );
 }

@@ -5,10 +5,10 @@ import { useState, type FormEvent } from "react";
 const CONTACT_EMAIL = "eyosafetalem@gmail.com";
 
 const FIELD =
-  "peer w-full rounded border border-[#1f2733] bg-[#04060a]/70 px-4 pb-3 pt-6 text-[15px] text-chrome outline-none transition-colors duration-300 placeholder:text-transparent focus:border-molten";
+  "peer w-full rounded border border-[#142a1c] bg-[#030a07]/70 px-4 pb-3 pt-6 text-[15px] text-bone outline-none transition-colors duration-300 placeholder:text-transparent focus:border-lichen";
 
 const LABEL =
-  "pointer-events-none absolute left-4 top-4 origin-left font-mono text-[0.7rem] uppercase tracking-[0.16em] text-[#5d6d80] transition-all duration-300 peer-focus:top-2 peer-focus:text-[0.6rem] peer-focus:text-molten peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-[0.6rem]";
+  "pointer-events-none absolute left-4 top-4 origin-left font-mono text-[0.7rem] uppercase tracking-[0.16em] text-[#6b8574] transition-all duration-300 peer-focus:top-2 peer-focus:text-[0.6rem] peer-focus:text-lichen peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-[0.6rem]";
 
 export function ContactForm() {
   const [sent, setSent] = useState(false);
@@ -70,12 +70,12 @@ export function ContactForm() {
         </label>
       </div>
 
-      <button type="submit" className="btn btn-molten w-full">
+      <button type="submit" className="btn btn-lichen w-full">
         Send the brief
       </button>
 
       <p
-        className="pt-1 text-center font-mono text-[0.7rem] leading-relaxed text-[#5d6d80]"
+        className="pt-1 text-center font-mono text-[0.7rem] leading-relaxed text-[#6b8574]"
         aria-live="polite"
       >
         {sent
@@ -114,7 +114,7 @@ function Field({
       />
       <label htmlFor={id} className={LABEL}>
         {label}
-        {required && <span className="text-molten"> *</span>}
+        {required && <span className="text-lichen"> *</span>}
       </label>
     </div>
   );

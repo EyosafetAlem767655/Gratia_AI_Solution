@@ -4,7 +4,7 @@ const STEPS = [
   {
     n: "01",
     title: "Diagnose",
-    body: "We sit with your data and the people who actually operate the process. Most of what looks like an AI problem turns out to be a measurement problem first.",
+    body: "We survey the ground: your data, and the people who actually operate the process. Most of what looks like an AI problem turns out to be a measurement problem first.",
   },
   {
     n: "02",
@@ -19,7 +19,7 @@ const STEPS = [
   {
     n: "04",
     title: "Operate",
-    body: "We stay on after launch: retraining, drift, incident response, and the next slice of the roadmap once the first one is earning its keep.",
+    body: "We stay on after launch: retraining, drift, incident response, and the next slice of the roadmap once the first one is earning its keep. Systems are tended, not shipped and forgotten.",
   },
 ];
 
@@ -37,15 +37,15 @@ export function Method() {
         </Reveal>
         <RevealText
           as="h2"
-          text="Four movements from problem to production."
-          className="chrome-type mt-5 block max-w-3xl text-[clamp(2rem,4.6vw,3.8rem)] font-semibold"
+          text="Four stages from seed to system."
+          className="grow-type mt-5 block max-w-3xl text-[clamp(2rem,4.6vw,3.8rem)] font-semibold"
         />
 
         <div className="relative mt-20">
           {/* The rail the steps hang from. */}
           <div
             aria-hidden
-            className="absolute inset-x-0 top-[13px] hidden h-px bg-gradient-to-r from-transparent via-[#232c3a] to-transparent lg:block"
+            className="absolute inset-x-0 top-[13px] hidden h-px bg-gradient-to-r from-transparent via-[#1c3626] to-transparent lg:block"
           />
 
           <ol className="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
@@ -54,15 +54,15 @@ export function Method() {
                 <div className="relative">
                   <span
                     aria-hidden
-                    className="absolute -top-[19px] left-0 hidden h-1.5 w-1.5 rotate-45 bg-molten lg:block"
+                    className="absolute -top-[19px] left-0 hidden h-1.5 w-1.5 rotate-45 bg-lichen lg:block"
                   />
-                  <span className="font-mono text-[0.72rem] tracking-[0.24em] text-molten">
+                  <span className="font-mono text-[0.72rem] tracking-[0.24em] text-lichen">
                     {step.n}
                   </span>
-                  <h3 className="mt-4 font-display text-2xl font-semibold text-chrome">
+                  <h3 className="mt-4 font-display text-2xl font-semibold text-bone">
                     {step.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-chrome-dim">
+                  <p className="mt-3 text-sm leading-relaxed text-sage">
                     {step.body}
                   </p>
                 </div>

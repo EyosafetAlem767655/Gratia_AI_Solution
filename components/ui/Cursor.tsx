@@ -4,11 +4,13 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
 /**
- * A chrome ring that trails the pointer and a hard dot that doesn't.
+ * A firefly: a soft ring that trails the pointer and a bright point that
+ * doesn't.
  *
- * The lag between the two is the whole trick: the dot reads as precision, the
- * ring as weight. It widens over anything marked `data-cursor="link"` and
- * disappears entirely on touch devices, where a fake cursor is just a bug.
+ * The lag between the two is the whole trick — the point reads as the insect,
+ * the ring as its glow catching up. It opens over anything marked
+ * `data-cursor="link"` and disappears entirely on touch devices, where a fake
+ * cursor is just a bug.
  */
 export function Cursor() {
   const ring = useRef<HTMLDivElement>(null);
@@ -44,7 +46,7 @@ export function Cursor() {
     const setHover = (on: boolean) =>
       gsap.to(ringEl, {
         scale: on ? 2.1 : 1,
-        borderColor: on ? "var(--molten)" : "var(--chrome-500)",
+        borderColor: on ? "var(--lichen)" : "var(--moss-line)",
         duration: 0.35,
         ease: "power3.out",
       });
@@ -79,7 +81,7 @@ export function Cursor() {
         // GSAP owns `transform` here, so the centring offset has to be margin.
         className="pointer-events-none fixed left-0 top-0 z-[70] h-8 w-8 rounded-full border opacity-0 mix-blend-difference"
         style={{
-          borderColor: "var(--chrome-500)",
+          borderColor: "var(--moss-line)",
           marginLeft: -16,
           marginTop: -16,
         }}
@@ -87,7 +89,7 @@ export function Cursor() {
       <div
         ref={dot}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[70] h-1 w-1 rounded-full bg-molten opacity-0"
+        className="pointer-events-none fixed left-0 top-0 z-[70] h-1 w-1 rounded-full bg-lichen opacity-0"
         style={{ marginLeft: -2, marginTop: -2 }}
       />
     </>

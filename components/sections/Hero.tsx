@@ -17,45 +17,45 @@ export function Hero() {
         <div className="col-span-12 lg:col-span-7 xl:col-span-6">
           <Reveal y={14} className="flex items-center gap-3">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-molten opacity-70" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-molten" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lichen opacity-70" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-lichen" />
             </span>
-            <span className="tag">Enterprise AI · Engineered</span>
+            <span className="tag">Enterprise AI · Cultivated</span>
           </Reveal>
 
           <h1 className="mt-7 text-[clamp(3rem,9.5vw,7.5rem)] font-semibold">
             <RevealText
               as="span"
-              text="Intelligence,"
-              className="chrome-type block"
+              text="Intelligence"
+              className="grow-type block"
               delay={0.05}
             />
             <RevealText
               as="span"
-              text="forged."
-              className="molten-type block"
+              text="that grows."
+              className="lichen-type block"
               delay={0.18}
             />
           </h1>
 
           <Reveal delay={0.45} y={26}>
-            <p className="mt-8 max-w-xl text-lg leading-relaxed text-chrome-dim">
+            <p className="mt-8 max-w-xl text-lg leading-relaxed text-sage">
               We design, build and ship production AI for the industries that
               run the world — industrial, financial, manufacturing, real estate
-              and e-commerce. From the first prototype to the system that runs
-              on Monday morning.
+              and e-commerce. Systems that put down roots in your data and keep
+              growing after we hand them over.
             </p>
           </Reveal>
 
           <Reveal delay={0.58} y={22}>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Magnetic>
-                <a href="#contact" className="btn btn-molten" data-cursor="link">
+                <a href="#contact" className="btn btn-lichen" data-cursor="link">
                   Start a project
                   <Arrow />
                 </a>
               </Magnetic>
-              <a href="#work" className="btn btn-ghost" data-cursor="link">
+              <a href="#work" className="btn btn-bark" data-cursor="link">
                 See the work
               </a>
             </div>
@@ -69,15 +69,15 @@ export function Hero() {
           y={0}
           className="col-span-12 hidden lg:col-span-5 lg:block xl:col-span-6"
         >
-          <dl className="ml-auto w-fit space-y-4 border-l border-[#1a212c] pl-6">
+          <dl className="ml-auto w-fit space-y-4 border-l border-[#142a1c] pl-6">
             {[
               ["Practice", "Applied AI systems"],
-              ["Engagement", "Prototype → Production"],
+              ["Engagement", "Seed → Production"],
               ["Sectors", "Five, plus bespoke"],
             ].map(([term, value]) => (
               <div key={term}>
                 <dt className="tag">{term}</dt>
-                <dd className="mt-1 font-mono text-sm text-chrome">{value}</dd>
+                <dd className="mt-1 font-mono text-sm text-bone">{value}</dd>
               </div>
             ))}
           </dl>
@@ -85,17 +85,17 @@ export function Hero() {
       </div>
 
       <div className="relative z-10 w-full">
-        <div className="hairline" />
+        <div className="vine" />
         <Marquee
-          className="py-4 text-[0.7rem] uppercase tracking-[0.28em] text-[#5d6d80]"
+          className="py-4 text-[0.7rem] uppercase tracking-[0.28em] text-[#6b8574]"
           items={[
             ...industries.map((key) => INDUSTRY_INFO[key].label),
-            "Prototype → Production",
+            "Seed → Production",
             "Evaluation & Guardrails",
             "Bespoke Architectures",
           ]}
         />
-        <div className="hairline" />
+        <div className="vine" />
       </div>
 
       <ScrollCue />
@@ -110,8 +110,8 @@ function ScrollCue() {
       className="pointer-events-none absolute bottom-28 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 lg:flex"
     >
       <span className="tag text-[0.6rem]">Scroll</span>
-      <span className="relative block h-10 w-px overflow-hidden bg-[#1a212c]">
-        <span className="absolute inset-x-0 top-0 h-4 animate-[cue_2.2s_ease-in-out_infinite] bg-molten" />
+      <span className="relative block h-10 w-px overflow-hidden bg-[#142a1c]">
+        <span className="absolute inset-x-0 top-0 h-4 animate-[cue_2.2s_ease-in-out_infinite] bg-lichen" />
       </span>
     </div>
   );

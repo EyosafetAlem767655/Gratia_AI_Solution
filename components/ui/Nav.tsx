@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useActiveSection, useScrollProgress } from "@/hooks/useScrollProgress";
+import { Logo } from "./Logo";
 import { Magnetic } from "./Magnetic";
 
 const LINKS = [
@@ -41,7 +41,7 @@ export function Nav() {
     <>
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[90] focus:rounded focus:bg-molten focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-[#140a02]"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[90] focus:rounded focus:bg-lichen focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-[#05160c]"
       >
         Skip to content
       </a>
@@ -49,7 +49,7 @@ export function Nav() {
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
           lifted
-            ? "border-b border-[#151b25] bg-[#04060a]/72 backdrop-blur-xl"
+            ? "border-b border-[#122318] bg-[#030a07]/72 backdrop-blur-xl"
             : "border-b border-transparent"
         }`}
       >
@@ -59,20 +59,10 @@ export function Nav() {
         >
           <a
             href="#hero"
-            className="group flex items-center gap-3"
+            className="group"
             aria-label="Gratia AI Solutions — home"
           >
-            <Image
-              src="/emblem.png"
-              alt=""
-              width={36}
-              height={36}
-              priority
-              className="h-8 w-8 object-contain transition-transform duration-500 group-hover:rotate-[8deg]"
-            />
-            <span className="font-display text-[0.95rem] font-semibold tracking-tight text-chrome">
-              GRATIA<span className="text-molten">.</span>AI
-            </span>
+            <Logo className="transition-opacity duration-300 group-hover:opacity-85" />
           </a>
 
           <ul className="hidden items-center gap-1 md:flex">
@@ -85,14 +75,14 @@ export function Nav() {
                     aria-current={isActive ? "true" : undefined}
                     className={`relative rounded px-3.5 py-2 text-sm transition-colors duration-300 ${
                       isActive
-                        ? "text-chrome"
-                        : "text-chrome-dim hover:text-chrome"
+                        ? "text-bone"
+                        : "text-sage hover:text-bone"
                     }`}
                   >
                     {link.label}
                     <span
                       aria-hidden
-                      className={`absolute inset-x-3.5 -bottom-0.5 h-px origin-left bg-molten transition-transform duration-500 ${
+                      className={`absolute inset-x-3.5 -bottom-0.5 h-px origin-left bg-lichen transition-transform duration-500 ${
                         isActive ? "scale-x-100" : "scale-x-0"
                       }`}
                     />
@@ -104,7 +94,7 @@ export function Nav() {
 
           <div className="flex items-center gap-3">
             <Magnetic className="hidden sm:inline-flex">
-              <a href="#contact" className="btn btn-molten !px-5 !py-2.5">
+              <a href="#contact" className="btn btn-lichen !px-5 !py-2.5">
                 Start a project
               </a>
             </Magnetic>
@@ -115,7 +105,7 @@ export function Nav() {
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? "Close menu" : "Open menu"}
-              className="flex h-11 w-11 items-center justify-center rounded border border-[#232c3a] text-chrome md:hidden"
+              className="flex h-11 w-11 items-center justify-center rounded border border-[#1c3626] text-bone md:hidden"
             >
               <span className="relative block h-3 w-4">
                 <span
@@ -133,10 +123,10 @@ export function Nav() {
           </div>
         </nav>
 
-        {/* Scroll progress hairline welded to the bottom of the bar. */}
+        {/* Scroll progress vine welded to the bottom of the bar. */}
         <div
           aria-hidden
-          className="h-px origin-left bg-gradient-to-r from-molten to-molten-hot"
+          className="h-px origin-left bg-gradient-to-r from-lichen to-jade"
           style={{ transform: `scaleX(${progress})` }}
         />
       </header>
@@ -144,7 +134,7 @@ export function Nav() {
       {/* Mobile drawer */}
       <div
         id="mobile-menu"
-        className={`fixed inset-0 z-40 flex flex-col justify-center bg-[#04060a]/97 px-[var(--gutter)] backdrop-blur-2xl transition-all duration-500 md:hidden ${
+        className={`fixed inset-0 z-40 flex flex-col justify-center bg-[#030a07]/97 px-[var(--gutter)] backdrop-blur-2xl transition-all duration-500 md:hidden ${
           open
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0"
@@ -156,7 +146,7 @@ export function Nav() {
               <a
                 href={`#${link.id}`}
                 onClick={() => setOpen(false)}
-                className="flex items-baseline gap-5 border-b border-[#151b25] py-5"
+                className="flex items-baseline gap-5 border-b border-[#122318] py-5"
                 style={{
                   transform: open ? "translateY(0)" : "translateY(18px)",
                   opacity: open ? 1 : 0,
@@ -164,7 +154,7 @@ export function Nav() {
                 }}
               >
                 <span className="tag">{String(i + 1).padStart(2, "0")}</span>
-                <span className="font-display text-3xl text-chrome">
+                <span className="font-display text-3xl text-bone">
                   {link.label}
                 </span>
               </a>
@@ -174,7 +164,7 @@ export function Nav() {
         <a
           href="#contact"
           onClick={() => setOpen(false)}
-          className="btn btn-molten mt-10 w-full"
+          className="btn btn-lichen mt-10 w-full"
         >
           Start a project
         </a>

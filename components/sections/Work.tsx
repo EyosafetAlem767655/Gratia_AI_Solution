@@ -23,14 +23,14 @@ export function Work({
             </Reveal>
             <RevealText
               as="h2"
-              text="Systems in production."
-              className="chrome-type mt-5 block text-[clamp(2rem,4.6vw,3.8rem)] font-semibold"
+              text="Systems in the wild."
+              className="grow-type mt-5 block text-[clamp(2rem,4.6vw,3.8rem)] font-semibold"
             />
           </div>
           <Reveal delay={0.2} className="col-span-12 lg:col-span-4">
-            <p className="text-chrome-dim lg:text-right">
-              Real systems, built with a client, solving a concrete business
-              problem.
+            <p className="text-sage lg:text-right">
+              Real systems, built with a client, running against a concrete
+              business problem.
             </p>
           </Reveal>
         </header>
@@ -67,7 +67,7 @@ function ProjectCard({
   return (
     <Spotlight
       as="article"
-      className="panel group h-full overflow-hidden rounded-[10px] transition-colors duration-500 hover:border-[#2b3746]"
+      className="panel group h-full overflow-hidden rounded-[var(--leaf)] transition-colors duration-500 hover:border-[#2a5138]"
     >
       <div className="relative">
         {cover && (
@@ -81,7 +81,7 @@ function ProjectCard({
               loading="lazy"
               className="h-full w-full object-cover opacity-70 grayscale transition-all duration-700 group-hover:scale-[1.04] group-hover:opacity-90 group-hover:grayscale-0"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0e131c] via-[#0e131c]/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a1a12] via-[#0a1a12]/30 to-transparent" />
           </div>
         )}
 
@@ -93,14 +93,14 @@ function ProjectCard({
                 src={project.companyLogoUrl}
                 alt=""
                 loading="lazy"
-                className="h-10 w-10 rounded border border-[#1f2733] bg-[#0b0f17] object-contain p-1.5"
+                className="h-10 w-10 rounded border border-[#142a1c] bg-[#06120c] object-contain p-1.5"
               />
               <div>
-                <h3 className="font-display text-lg font-semibold text-chrome">
+                <h3 className="font-display text-lg font-semibold text-bone">
                   {project.companyName}
                 </h3>
                 {project.industry && (
-                  <span className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-molten">
+                  <span className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-lichen">
                     {project.industry}
                   </span>
                 )}
@@ -111,12 +111,12 @@ function ProjectCard({
             </span>
           </div>
 
-          <p className="mt-5 text-sm leading-relaxed text-chrome-dim">
+          <p className="mt-5 text-sm leading-relaxed text-sage">
             {project.aiSummary ?? project.description}
           </p>
 
           {project.testimonial && (
-            <blockquote className="mt-6 border-l border-molten/60 pl-4 text-sm italic leading-relaxed text-[#8496ab]">
+            <blockquote className="mt-6 border-l border-lichen/60 pl-4 text-sm italic leading-relaxed text-[#96b0a0]">
               &ldquo;{project.testimonial}&rdquo;
             </blockquote>
           )}
@@ -132,7 +132,7 @@ function SkeletonGrid() {
       {[0, 1].map((i) => (
         <div
           key={i}
-          className="panel h-72 animate-pulse rounded-[10px]"
+          className="panel h-72 animate-pulse rounded-[var(--leaf)]"
           style={{ animationDelay: `${i * 0.15}s` }}
         />
       ))}
@@ -143,20 +143,20 @@ function SkeletonGrid() {
 
 function EmptyState() {
   return (
-    <div className="panel relative mx-auto max-w-2xl overflow-hidden rounded-[10px] p-10 text-center">
+    <div className="panel relative mx-auto max-w-2xl overflow-hidden rounded-[var(--leaf)] p-10 text-center">
       <div
         aria-hidden
         className="absolute inset-0 opacity-[0.04] [background-image:linear-gradient(rgba(180,200,220,1)_1px,transparent_1px),linear-gradient(90deg,rgba(180,200,220,1)_1px,transparent_1px)] [background-size:28px_28px]"
       />
       <div className="relative">
         <span className="tag">Awaiting intake</span>
-        <p className="mt-4 text-lg text-chrome">
+        <p className="mt-4 text-lg text-bone">
           Case studies are being commissioned.
         </p>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-chrome-dim">
+        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-sage">
           Client work is published straight from the studio&apos;s Telegram bot
           with{" "}
-          <code className="rounded border border-[#1f2733] bg-[#04060a] px-1.5 py-0.5 font-mono text-[0.75rem] text-molten">
+          <code className="rounded border border-[#142a1c] bg-[#030a07] px-1.5 py-0.5 font-mono text-[0.75rem] text-lichen">
             /addproject
           </code>
           .

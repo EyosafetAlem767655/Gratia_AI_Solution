@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { LogoMark } from "./Logo";
 
 // GSAP throttles its clock when frames take longer than half a second, which is
 // exactly what happens behind a heavy WebGL scene on a weak GPU — the loader
@@ -10,8 +10,8 @@ import gsap from "gsap";
 gsap.ticker.lagSmoothing(0);
 
 /**
- * Cold start. The emblem sits in the dark while a counter climbs, then the
- * whole panel splits and lifts to reveal the scene behind it.
+ * Cold start. The mark breathes in the dark while a counter climbs, then the
+ * panels peel back to reveal the grove behind them.
  *
  * It waits for `window.load` but never longer than a hard ceiling — a loader
  * that outstays the content it hides is worse than no loader at all. Visitors
@@ -134,8 +134,8 @@ export function Preloader() {
           <div
             key={i}
             data-preload-panel
-            className="h-full flex-1 bg-void"
-            style={{ borderRight: i < 3 ? "1px solid #0b0f17" : undefined }}
+            className="h-full flex-1 bg-deep"
+            style={{ borderRight: i < 3 ? "1px solid #06120c" : undefined }}
           />
         ))}
       </div>
@@ -144,28 +144,21 @@ export function Preloader() {
         data-preload-fade
         className="relative flex flex-col items-center gap-7"
       >
-        <Image
-          src="/emblem.png"
-          alt=""
-          width={72}
-          height={72}
-          priority
-          className="h-16 w-16 object-contain opacity-90"
-        />
+        <LogoMark className="h-16 w-16" />
 
         <div className="flex w-56 flex-col gap-3">
-          <div className="h-px w-full overflow-hidden bg-[#1a212c]">
+          <div className="h-px w-full overflow-hidden bg-[#142a1c]">
             <div
               ref={bar}
-              className="h-full w-full origin-left bg-molten"
+              className="h-full w-full origin-left bg-lichen"
               style={{ transform: "scaleX(0)" }}
             />
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="tag">Forging</span>
+            <span className="tag">Germinating</span>
             <span
               ref={counter}
-              className="chrome-type font-mono text-sm tabular-nums"
+              className="grow-type font-mono text-sm tabular-nums"
             >
               000
             </span>

@@ -3,7 +3,7 @@
 import { useActiveSection, useScrollProgress } from "@/hooks/useScrollProgress";
 
 const STOPS = [
-  { id: "hero", label: "Core" },
+  { id: "hero", label: "Seed" },
   { id: "capabilities", label: "Capabilities" },
   { id: "method", label: "Method" },
   { id: "work", label: "Work" },
@@ -13,9 +13,9 @@ const STOPS = [
 const IDS = STOPS.map((s) => s.id);
 
 /**
- * Instrument rail down the right edge: depth readout, a molten fill tracking
- * scroll, and a tick per section. Decorative and duplicative of the nav, so it
- * is hidden from assistive tech and from anything narrower than a laptop.
+ * Field rail down the right edge: a depth readout, sap rising with scroll, and
+ * a tick per section. Decorative and duplicative of the nav, so it is hidden
+ * from assistive tech and from anything narrower than a laptop.
  */
 export function ScrollRail() {
   const progress = useScrollProgress();
@@ -24,15 +24,15 @@ export function ScrollRail() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed right-6 top-1/2 z-40 hidden -translate-y-1/2 flex-col items-center gap-5 lg:flex"
+      className="pointer-events-none fixed right-4 top-1/2 z-40 hidden -translate-y-1/2 flex-col items-center gap-5 xl:flex"
     >
-      <span className="font-mono text-[0.65rem] tracking-[0.2em] text-[#5d6d80]">
+      <span className="font-mono text-[0.65rem] tracking-[0.2em] text-[#6b8574]">
         {String(Math.round(progress * 100)).padStart(3, "0")}
       </span>
 
-      <div className="relative h-52 w-px bg-[#1a212c]">
+      <div className="relative h-52 w-px bg-[#142a1c]">
         <div
-          className="absolute inset-x-0 top-0 origin-top bg-gradient-to-b from-molten-hot to-molten"
+          className="absolute inset-x-0 top-0 origin-top bg-gradient-to-b from-lichen to-jade"
           style={{ height: "100%", transform: `scaleY(${progress})` }}
         />
 
@@ -44,8 +44,8 @@ export function ScrollRail() {
               key={stop.id}
               className={`absolute -left-[3px] h-[7px] w-[7px] rounded-full border transition-all duration-500 ${
                 isActive
-                  ? "scale-125 border-molten bg-molten"
-                  : "border-[#3d4959] bg-[#04060a]"
+                  ? "scale-125 border-lichen bg-lichen"
+                  : "border-[#2a5138] bg-[#030a07]"
               }`}
               style={{ top: `calc(${at * 100}% - 3px)` }}
             />
@@ -54,10 +54,10 @@ export function ScrollRail() {
       </div>
 
       <span
-        className="font-mono text-[0.6rem] uppercase tracking-[0.24em] text-[#5d6d80]"
+        className="font-mono text-[0.6rem] uppercase tracking-[0.24em] text-[#6b8574]"
         style={{ writingMode: "vertical-rl" }}
       >
-        {STOPS.find((s) => s.id === active)?.label ?? "Core"}
+        {STOPS.find((s) => s.id === active)?.label ?? "Seed"}
       </span>
     </div>
   );

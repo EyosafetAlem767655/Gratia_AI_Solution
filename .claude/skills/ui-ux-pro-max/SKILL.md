@@ -4,7 +4,7 @@ description: "UI/UX design intelligence. Searchable local database with 67 style
 ---
 # UI/UX Pro Max - Design Intelligence
 
-Comprehensive design guide for web, mobile, and desktop applications. Contains 67 styles, 161 color palettes, 57 font pairings, 99 UX guidelines, and 25 chart types across 22 technology stacks. Searchable database with priority-based recommendations.
+Comprehensive design guide for web, mobile, and desktop applications. Contains 84 styles, 192 color palettes, 74 font pairings, 98 UX guidelines, and 25 chart types across 22 technology stacks. Searchable database with priority-based recommendations.
 
 ## When to Apply
 

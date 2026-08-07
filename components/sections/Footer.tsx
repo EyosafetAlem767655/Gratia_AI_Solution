@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { Logo } from "@/components/ui/Logo";
 
 const LINKS = [
   { href: "#capabilities", label: "Capabilities" },
@@ -9,25 +9,14 @@ const LINKS = [
 
 export function Footer() {
   return (
-    <footer className="relative z-10 border-t border-[#141a25] px-[var(--gutter)] pb-10 pt-16">
-      <div className="absolute inset-0 bg-[#04060a]/70 backdrop-blur-md" aria-hidden />
+    <footer className="relative z-10 border-t border-[#102718] px-[var(--gutter)] pb-10 pt-16">
+      <div className="absolute inset-0 bg-[#030a07]/70 backdrop-blur-md" aria-hidden />
 
       <div className="relative z-10 mx-auto max-w-[80rem]">
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">
-            <div className="flex items-center gap-3">
-              <Image
-                src="/emblem.png"
-                alt=""
-                width={40}
-                height={40}
-                className="h-9 w-9 object-contain"
-              />
-              <span className="font-display text-base font-semibold text-chrome">
-                GRATIA<span className="text-molten">.</span>AI
-              </span>
-            </div>
-            <p className="mt-5 text-sm leading-relaxed text-chrome-dim">
+            <Logo />
+            <p className="mt-5 text-sm leading-relaxed text-sage">
               Production AI for industrial, financial, manufacturing, real
               estate and e-commerce companies.
             </p>
@@ -40,7 +29,7 @@ export function Footer() {
                   <a
                     href={link.href}
                     data-cursor="link"
-                    className="text-sm text-chrome-dim transition-colors duration-300 hover:text-chrome"
+                    className="text-sm text-sage transition-colors duration-300 hover:text-bone"
                   >
                     {link.label}
                   </a>
@@ -52,7 +41,7 @@ export function Footer() {
                 <a
                   href="mailto:eyosafetalem@gmail.com"
                   data-cursor="link"
-                  className="text-sm text-chrome-dim transition-colors duration-300 hover:text-chrome"
+                  className="text-sm text-sage transition-colors duration-300 hover:text-bone"
                 >
                   eyosafetalem@gmail.com
                 </a>
@@ -61,7 +50,7 @@ export function Footer() {
                 <a
                   href="tel:+251938767655"
                   data-cursor="link"
-                  className="text-sm text-chrome-dim transition-colors duration-300 hover:text-chrome"
+                  className="text-sm text-sage transition-colors duration-300 hover:text-bone"
                 >
                   +251 938 767 655
                 </a>
@@ -80,15 +69,15 @@ export function Footer() {
           </span>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-[#141a25] pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-mono text-[0.7rem] tracking-[0.1em] text-[#3d4959]">
+        <div className="mt-10 flex flex-col gap-3 border-t border-[#102718] pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-mono text-[0.7rem] tracking-[0.1em] text-[#2a5138]">
             © {new Date().getFullYear()} Gratia AI Solutions. All rights
             reserved.
           </p>
           <a
             href="#hero"
             data-cursor="link"
-            className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-[#5d6d80] transition-colors duration-300 hover:text-molten"
+            className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-[#6b8574] transition-colors duration-300 hover:text-lichen"
           >
             Back to top ↑
           </a>

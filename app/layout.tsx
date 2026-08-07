@@ -1,26 +1,28 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Bricolage_Grotesque, IBM_Plex_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 
-// Space Grotesk carries the headlines — geometric, slightly mechanical, and it
-// echoes the engineered curves of the emblem far better than a neutral grotesk.
-const display = Space_Grotesk({
+// Bricolage Grotesque for headlines. It has genuinely irregular joints and
+// terminals — grown rather than ruled — which is exactly the tension the brand
+// is about. A neutral grotesk here would flatten the whole idea.
+const display = Bricolage_Grotesque({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+// Manrope carries body copy: geometric enough to sit beside the machinery,
+// round enough to stay warm at small sizes.
+const body = Manrope({
+  variable: "--font-body",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
   display: "swap",
 });
 
-// Every label, tag, index and readout on the site is monospaced — it makes the
-// interface read like instrumentation rather than a brochure.
-const mono = JetBrains_Mono({
+// Every label, index and readout is monospaced, like a field notebook.
+const mono = IBM_Plex_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   weight: ["400", "500"],
@@ -31,19 +33,19 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   ),
-  title: "Gratia AI Solutions | Intelligence, Engineered",
+  title: "Gratia AI Solutions | Where the Machine Grows",
   description:
-    "Gratia AI Solutions builds production AI for industrial, financial, manufacturing, real estate, and e-commerce companies.",
+    "Gratia AI Solutions builds production AI for industrial, financial, manufacturing, real estate, and e-commerce companies — systems designed to grow with the business, not bolt onto it.",
   openGraph: {
     title: "Gratia AI Solutions",
     description:
-      "Intelligence, engineered — production AI systems for the industries that run the world.",
+      "Where the machine grows — production AI for the industries that run the world.",
     images: ["/logo.png"],
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#04060A",
+  themeColor: "#030A07",
   colorScheme: "dark",
 };
 
@@ -55,9 +57,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${display.variable} ${inter.variable} ${mono.variable} h-full`}
+      className={`${display.variable} ${body.variable} ${mono.variable} h-full`}
     >
-      <body className="min-h-full bg-void text-foreground antialiased">
+      <body className="min-h-full bg-deep text-foreground antialiased">
         {children}
       </body>
     </html>

@@ -63,14 +63,14 @@ export function Capabilities() {
             </Reveal>
             <RevealText
               as="h2"
-              text="Engineered for your industry, not adapted to it."
-              className="chrome-type mt-5 block max-w-3xl text-[clamp(2rem,4.6vw,3.8rem)] font-semibold"
+              text="Grown for your ground, not transplanted onto it."
+              className="grow-type mt-5 block max-w-3xl text-[clamp(2rem,4.6vw,3.8rem)] font-semibold"
             />
           </div>
           <Reveal delay={0.2} className="col-span-12 lg:col-span-5">
-            <p className="max-w-md text-chrome-dim lg:ml-auto">
-              Every sector has its own data, its own constraints, and its own
-              cost of being wrong. We tailor the models, the tooling and the
+            <p className="max-w-md text-sage lg:ml-auto">
+              Every sector has its own soil — its own data, constraints and cost
+              of being wrong. We shape the models, the tooling and the
               deployment to yours.
             </p>
           </Reveal>
@@ -88,20 +88,20 @@ export function Capabilities() {
               >
                 <Spotlight
                   as="article"
-                  className="panel group h-full rounded-[10px] p-7 transition-colors duration-500 hover:border-[#2b3746]"
+                  className="panel group h-full rounded-[var(--leaf)] p-7 transition-colors duration-500 hover:border-[#2a5138]"
                 >
                   <div className="relative flex h-full flex-col">
                     <div className="flex items-start justify-between gap-4">
-                      <span className="flex h-11 w-11 items-center justify-center rounded border border-[#232c3a] bg-[#0b0f17] text-molten transition-colors duration-500 group-hover:border-molten/50">
+                      <span className="flex h-11 w-11 items-center justify-center rounded border border-[#1c3626] bg-[#06120c] text-lichen transition-colors duration-500 group-hover:border-lichen/50">
                         <Icon d={ICON_PATHS[info.shape]} />
                       </span>
                       <span className="tag text-[0.65rem]">{info.code}</span>
                     </div>
 
-                    <h3 className="mt-7 font-display text-2xl font-semibold text-chrome">
+                    <h3 className="mt-7 font-display text-2xl font-semibold text-bone">
                       {info.label}
                     </h3>
-                    <p className="mt-3 max-w-md text-sm leading-relaxed text-chrome-dim">
+                    <p className="mt-3 max-w-md text-sm leading-relaxed text-sage">
                       {info.description}
                     </p>
 
@@ -109,7 +109,7 @@ export function Capabilities() {
                       {info.ships.map((ship) => (
                         <li
                           key={ship}
-                          className="rounded-full border border-[#1f2733] px-3 py-1 font-mono text-[0.68rem] text-[#8496ab] transition-colors duration-500 group-hover:border-[#2b3746] group-hover:text-chrome"
+                          className="rounded-full border border-[#142a1c] px-3 py-1 font-mono text-[0.68rem] text-[#96b0a0] transition-colors duration-500 group-hover:border-[#2a5138] group-hover:text-bone"
                         >
                           {ship}
                         </li>
@@ -124,26 +124,26 @@ export function Capabilities() {
           <Reveal delay={0.3} y={30} className="lg:col-span-1">
             <Spotlight
               as="article"
-              className="group h-full rounded-[10px] border border-dashed border-[#242f3d] bg-[#0b0f17]/40 p-7 backdrop-blur-md transition-colors duration-500 hover:border-molten/40"
+              className="group h-full rounded-[var(--leaf)] border border-dashed border-[#1c3626] bg-[#06120c]/40 p-7 backdrop-blur-md transition-colors duration-500 hover:border-lichen/40"
             >
               <div className="relative flex h-full flex-col">
                 <div className="flex items-start justify-between gap-4">
-                  <span className="flex h-11 w-11 items-center justify-center rounded border border-[#232c3a] bg-[#0b0f17] text-chrome">
+                  <span className="flex h-11 w-11 items-center justify-center rounded border border-[#1c3626] bg-[#06120c] text-bone">
                     <Icon d={SPARK} />
                   </span>
                   <span className="tag text-[0.65rem]">ANY-06</span>
                 </div>
-                <h3 className="mt-7 font-display text-2xl font-semibold text-chrome">
+                <h3 className="mt-7 font-display text-2xl font-semibold text-bone">
                   Everything else
                 </h3>
-                <p className="mt-3 text-sm leading-relaxed text-chrome-dim">
+                <p className="mt-3 text-sm leading-relaxed text-sage">
                   Outside these five? We design bespoke architectures for
                   problems that don&apos;t fit a category yet.
                 </p>
                 <a
                   href="#contact"
                   data-cursor="link"
-                  className="mt-auto inline-flex items-center gap-2 pt-6 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-molten"
+                  className="mt-auto inline-flex items-center gap-2 pt-6 font-mono text-[0.72rem] uppercase tracking-[0.18em] text-lichen"
                 >
                   Talk it through
                   <span
