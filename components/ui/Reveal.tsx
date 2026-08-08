@@ -24,6 +24,7 @@ export function Reveal({
   y = 34,
   delay = 0,
   duration = 1,
+  variant = "lift",
   as: RawTag = "div",
 }: {
   children: ReactNode;
@@ -31,6 +32,7 @@ export function Reveal({
   y?: number;
   delay?: number;
   duration?: number;
+  variant?: "fade" | "lift" | "depth" | "scale";
   as?: ElementType;
 }) {
   const ref = useRef<HTMLElement>(null);
@@ -45,7 +47,13 @@ export function Reveal({
       return;
     }
 
-    gsap.set(el, { opacity: 0, y });
+    const from = {
+      fade: { opacity: 0 },
+      lift: { opacity: 0, y },
+      depth: { opacity: 0, y: y * 0.45, scale: 0.94, filter: "blur(10px)" },
+      scale: { opacity: 0, scale: 0.9 },
+    }[variant];
+    gsap.set(el, from);
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -54,6 +62,8 @@ export function Reveal({
           gsap.to(el, {
             opacity: 1,
             y: 0,
+            scale: 1,
+            filter: "blur(0px)",
             duration,
             delay,
             ease: "power3.out",
@@ -66,13 +76,49 @@ export function Reveal({
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [y, delay, duration]);
+  }, [y, delay, duration, variant]);
 
   return (
     <Tag ref={ref} data-reveal className={className}>
       {children}
     </Tag>
   );
+}
+
+/** Staggers direct children into view as one authored transition. */
+export function RevealGroup({
+  children,
+  className,
+  stagger = 0.09,
+  as: RawTag = "div",
+}: {
+  children: ReactNode;
+  className?: string;
+  stagger?: number;
+  as?: ElementType;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const Tag = RawTag as unknown as PolymorphicTag;
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const items = Array.from(el.children) as HTMLElement[];
+    if (prefersReduced()) {
+      gsap.set(items, { opacity: 1, y: 0 });
+      return;
+    }
+    gsap.set(items, { opacity: 0, y: 28 });
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry?.isIntersecting) return;
+      gsap.to(items, { opacity: 1, y: 0, duration: 0.9, stagger, ease: "power3.out" });
+      observer.disconnect();
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [stagger]);
+
+  return <Tag ref={ref} className={className}>{children}</Tag>;
 }
 
 /**

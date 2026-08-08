@@ -3,11 +3,11 @@
 import { useActiveSection, useScrollProgress } from "@/hooks/useScrollProgress";
 
 const STOPS = [
-  { id: "hero", label: "Seed" },
-  { id: "capabilities", label: "Capabilities" },
-  { id: "method", label: "Method" },
-  { id: "work", label: "Work" },
-  { id: "contact", label: "Contact" },
+  { id: "hero", label: "Awaken" },
+  { id: "capabilities", label: "Connect" },
+  { id: "method", label: "Build" },
+  { id: "work", label: "Prove" },
+  { id: "contact", label: "Evolve" },
 ] as const;
 
 const IDS = STOPS.map((s) => s.id);
@@ -57,7 +57,7 @@ export function ScrollRail() {
         className="font-mono text-[0.6rem] uppercase tracking-[0.24em] text-[#6b8574]"
         style={{ writingMode: "vertical-rl" }}
       >
-        {STOPS.find((s) => s.id === active)?.label ?? "Seed"}
+        {STOPS.find((s) => s.id === active)?.label ?? "Awaken"}
       </span>
     </div>
   );

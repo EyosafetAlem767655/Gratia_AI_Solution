@@ -28,6 +28,7 @@
   --lichen-soft: #ddff85;
   --lichen-deep: #7fae15;
   --jade: #1fd69b;
+  --cyan-life: #52eee0;
   --jade-deep: #0d8f66;
   --moth: #ff9e5c;
 
@@ -205,11 +206,20 @@ h4 {
 /* A leaf-shaped panel. Opaque enough to hold small type over a live scene. */
 .panel {
   position: relative;
-  background: color-mix(in srgb, var(--bark) 92%, transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--bark) 91%, transparent), color-mix(in srgb, #071d1c 72%, transparent));
   border: 1px solid var(--moss-line-soft);
   border-radius: var(--leaf);
   backdrop-filter: blur(18px) saturate(1.1);
   -webkit-backdrop-filter: blur(18px) saturate(1.1);
+}
+
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(80% 60% at 100% 0%, color-mix(in srgb, var(--cyan-life) 7%, transparent), transparent 70%);
+  pointer-events: none;
 }
 
 /* Growth line along the top edge — the panel looks fed, not drawn. */
@@ -389,6 +399,24 @@ h4 {
   );
 }
 
+.living-still > :first-child {
+  transform: scale(1.035);
+  animation: still-breathe 18s ease-in-out infinite alternate;
+}
+
+@keyframes still-breathe {
+  to { transform: scale(1.075) translate3d(-0.6%, -0.3%, 0); }
+}
+
+.scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  pointer-events: none;
+  opacity: 0.035;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(90, 240, 225, 0.24) 4px);
+}
+
 /* Legibility wash between the live scene and section copy. */
 .scrim {
   position: absolute;
@@ -481,7 +509,8 @@ h4 {
   .grow-type,
   .lichen-type,
   .marquee-track,
-  .breathe {
+  .breathe,
+  .living-still > :first-child {
     animation: none;
   }
 

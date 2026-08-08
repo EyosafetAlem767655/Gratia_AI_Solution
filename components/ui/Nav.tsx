@@ -6,10 +6,10 @@ import { Logo } from "./Logo";
 import { Magnetic } from "./Magnetic";
 
 const LINKS = [
-  { id: "capabilities", label: "Capabilities" },
-  { id: "method", label: "Method" },
-  { id: "work", label: "Work" },
-  { id: "contact", label: "Contact" },
+  { id: "capabilities", label: "Systems" },
+  { id: "method", label: "Evolution" },
+  { id: "work", label: "Proof" },
+  { id: "contact", label: "Begin" },
 ] as const;
 
 const SECTION_IDS = ["hero", ...LINKS.map((l) => l.id)] as const;

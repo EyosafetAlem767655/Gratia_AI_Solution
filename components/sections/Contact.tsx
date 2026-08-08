@@ -36,12 +36,12 @@ export function Contact() {
         <div className="grid gap-14 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-5">
             <Reveal y={16}>
-              <span className="tag">04 — Contact</span>
+              <span className="tag">04 — The clearing</span>
             </Reveal>
 
             <RevealText
               as="h2"
-              text="Let's scope your AI project."
+              text="What should come alive next?"
               className="grow-type mt-5 block text-[clamp(2rem,4.6vw,3.8rem)] font-semibold"
             />
 

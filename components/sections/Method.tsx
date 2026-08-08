@@ -1,24 +1,24 @@
-import { Reveal, RevealText } from "@/components/ui/Reveal";
+import { Reveal, RevealGroup, RevealText } from "@/components/ui/Reveal";
 
 const STEPS = [
   {
     n: "01",
-    title: "Diagnose",
+    title: "Discover",
     body: "We survey the ground: your data, and the people who actually operate the process. Most of what looks like an AI problem turns out to be a measurement problem first.",
   },
   {
     n: "02",
-    title: "Prototype",
+    title: "Connect",
     body: "A working model against your real data — not a demo on a public dataset. You see the honest ceiling of the approach before anyone commits a budget to it.",
   },
   {
     n: "03",
-    title: "Harden",
+    title: "Build",
     body: "Evaluation suites, guardrails, monitoring, fallbacks. The unglamorous half that decides whether a model survives contact with production.",
   },
   {
     n: "04",
-    title: "Operate",
+    title: "Evolve",
     body: "We stay on after launch: retraining, drift, incident response, and the next slice of the roadmap once the first one is earning its keep. Systems are tended, not shipped and forgotten.",
   },
 ];
@@ -33,11 +33,11 @@ export function Method() {
 
       <div className="relative z-10 mx-auto max-w-[80rem]">
         <Reveal y={16}>
-          <span className="tag">02 — Method</span>
+          <span className="tag">02 — Transformation</span>
         </Reveal>
         <RevealText
           as="h2"
-          text="Four stages from seed to system."
+          text="From first signal to living system."
           className="grow-type mt-5 block max-w-3xl text-[clamp(2rem,4.6vw,3.8rem)] font-semibold"
         />
 
@@ -48,9 +48,9 @@ export function Method() {
             className="absolute inset-x-0 top-[13px] hidden h-px bg-gradient-to-r from-transparent via-[#1c3626] to-transparent lg:block"
           />
 
-          <ol className="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
-            {STEPS.map((step, i) => (
-              <Reveal key={step.n} as="li" delay={i * 0.09} y={28}>
+          <RevealGroup as="ol" className="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+            {STEPS.map((step) => (
+              <li key={step.n}>
                 <div className="relative">
                   <span
                     aria-hidden
@@ -66,9 +66,9 @@ export function Method() {
                     {step.body}
                   </p>
                 </div>
-              </Reveal>
+              </li>
             ))}
-          </ol>
+          </RevealGroup>
         </div>
       </div>
     </section>

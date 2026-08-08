@@ -1,8 +1,6 @@
 import { Reveal, RevealText } from "@/components/ui/Reveal";
 import { Spotlight } from "@/components/ui/Spotlight";
-import { INDUSTRY_INFO, type Industry, type PrimaryShape } from "@/lib/types";
-
-const industries = Object.keys(INDUSTRY_INFO) as Industry[];
+import { SOLUTIONS, type PrimaryShape } from "@/lib/types";
 
 const ICON_PATHS: Record<PrimaryShape, string> = {
   gear: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z",
@@ -45,6 +43,7 @@ const SPANS = [
   "lg:col-span-1",
   "lg:col-span-1",
   "lg:col-span-1",
+  "lg:col-span-2",
 ] as const;
 
 export function Capabilities() {
@@ -59,29 +58,27 @@ export function Capabilities() {
         <header className="grid grid-cols-12 items-end gap-y-6">
           <div className="col-span-12 lg:col-span-7">
             <Reveal y={16}>
-              <span className="tag">01 — Capabilities</span>
+              <span className="tag">01 — Living systems</span>
             </Reveal>
             <RevealText
               as="h2"
-              text="Grown for your ground, not transplanted onto it."
+              text="Intelligence shaped around the work."
               className="grow-type mt-5 block max-w-3xl text-[clamp(2rem,4.6vw,3.8rem)] font-semibold"
             />
           </div>
           <Reveal delay={0.2} className="col-span-12 lg:col-span-5">
             <p className="max-w-md text-sage lg:ml-auto">
-              Every sector has its own soil — its own data, constraints and cost
-              of being wrong. We shape the models, the tooling and the
-              deployment to yours.
+              We connect models, people and operational data into one useful
+              system—designed for the reality of your organisation.
             </p>
           </Reveal>
         </header>
 
         <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {industries.map((key, i) => {
-            const info = INDUSTRY_INFO[key];
+          {SOLUTIONS.map((info, i) => {
             return (
               <Reveal
-                key={key}
+                key={info.code}
                 delay={i * 0.06}
                 y={30}
                 className={SPANS[i] ?? "lg:col-span-1"}
@@ -106,7 +103,7 @@ export function Capabilities() {
                     </p>
 
                     <ul className="mt-auto flex flex-wrap gap-2 pt-7">
-                      {info.ships.map((ship) => (
+                      {info.outcomes.map((ship) => (
                         <li
                           key={ship}
                           className="rounded-full border border-[#142a1c] px-3 py-1 font-mono text-[0.68rem] text-[#96b0a0] transition-colors duration-500 group-hover:border-[#2a5138] group-hover:text-bone"
@@ -131,14 +128,14 @@ export function Capabilities() {
                   <span className="flex h-11 w-11 items-center justify-center rounded border border-[#1c3626] bg-[#06120c] text-bone">
                     <Icon d={SPARK} />
                   </span>
-                  <span className="tag text-[0.65rem]">ANY-06</span>
+                  <span className="tag text-[0.65rem]">NEW-07</span>
                 </div>
                 <h3 className="mt-7 font-display text-2xl font-semibold text-bone">
-                  Everything else
+                  A problem without a label?
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-sage">
-                  Outside these five? We design bespoke architectures for
-                  problems that don&apos;t fit a category yet.
+                  Bring us the bottleneck. We will find the smallest intelligent
+                  system capable of changing it.
                 </p>
                 <a
                   href="#contact"

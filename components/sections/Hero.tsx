@@ -1,9 +1,6 @@
 import { Magnetic } from "@/components/ui/Magnetic";
 import { Marquee } from "@/components/ui/Marquee";
 import { Reveal, RevealText } from "@/components/ui/Reveal";
-import { INDUSTRY_INFO, type Industry } from "@/lib/types";
-
-const industries = Object.keys(INDUSTRY_INFO) as Industry[];
 
 export function Hero() {
   return (
@@ -20,19 +17,19 @@ export function Hero() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lichen opacity-70" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-lichen" />
             </span>
-            <span className="tag">Enterprise AI · Cultivated</span>
+            <span className="tag">Gratia AI Solutions · Living intelligence</span>
           </Reveal>
 
           <h1 className="mt-7 text-[clamp(3rem,9.5vw,7.5rem)] font-semibold">
             <RevealText
               as="span"
-              text="Intelligence"
+              text="Make intelligence"
               className="grow-type block"
               delay={0.05}
             />
             <RevealText
               as="span"
-              text="that grows."
+              text="come alive."
               className="lichen-type block"
               delay={0.18}
             />
@@ -40,10 +37,9 @@ export function Hero() {
 
           <Reveal delay={0.45} y={26}>
             <p className="mt-8 max-w-xl text-lg leading-relaxed text-sage">
-              We design, build and ship production AI for the industries that
-              run the world — industrial, financial, manufacturing, real estate
-              and e-commerce. Systems that put down roots in your data and keep
-              growing after we hand them over.
+              We create production AI that senses, learns and acts inside your
+              business—from automation and prediction to vision and entirely
+              new intelligent products.
             </p>
           </Reveal>
 
@@ -56,7 +52,7 @@ export function Hero() {
                 </a>
               </Magnetic>
               <a href="#work" className="btn btn-bark" data-cursor="link">
-                See the work
+                  Enter the world
               </a>
             </div>
           </Reveal>
@@ -71,9 +67,9 @@ export function Hero() {
         >
           <dl className="ml-auto w-fit space-y-4 border-l border-[#142a1c] pl-6">
             {[
-              ["Practice", "Applied AI systems"],
-              ["Engagement", "Seed → Production"],
-              ["Sectors", "Five, plus bespoke"],
+              ["Practice", "Applied intelligence"],
+              ["System", "Signal → Decision → Action"],
+              ["Terrain", "Any industry · Any scale"],
             ].map(([term, value]) => (
               <div key={term}>
                 <dt className="tag">{term}</dt>
@@ -89,7 +85,12 @@ export function Hero() {
         <Marquee
           className="py-4 text-[0.7rem] uppercase tracking-[0.28em] text-[#6b8574]"
           items={[
-            ...industries.map((key) => INDUSTRY_INFO[key].label),
+            "AI automation",
+            "Intelligent operations",
+            "Predictive systems",
+            "Computer vision",
+            "AI experiences",
+            "Bespoke intelligence",
             "Seed → Production",
             "Evaluation & Guardrails",
             "Bespoke Architectures",

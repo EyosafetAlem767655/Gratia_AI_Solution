@@ -19,18 +19,18 @@ export function Work({
         <header className="grid grid-cols-12 items-end gap-y-6">
           <div className="col-span-12 lg:col-span-8">
             <Reveal y={16}>
-              <span className="tag">03 — Selected work</span>
+              <span className="tag">03 — Intelligence in motion</span>
             </Reveal>
             <RevealText
               as="h2"
-              text="Systems in the wild."
+              text="Proof that lives beyond the demo."
               className="grow-type mt-5 block text-[clamp(2rem,4.6vw,3.8rem)] font-semibold"
             />
           </div>
           <Reveal delay={0.2} className="col-span-12 lg:col-span-4">
             <p className="text-sage lg:text-right">
-              Real systems, built with a client, running against a concrete
-              business problem.
+              Real systems built with clients, connected to real operations,
+              and measured against outcomes that matter.
             </p>
           </Reveal>
         </header>

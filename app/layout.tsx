@@ -33,13 +33,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   ),
-  title: "Gratia AI Solutions | Where the Machine Grows",
+  title: "Gratia AI Solutions | Make Intelligence Come Alive",
   description:
-    "Gratia AI Solutions builds production AI for industrial, financial, manufacturing, real estate, and e-commerce companies — systems designed to grow with the business, not bolt onto it.",
+    "Gratia AI Solutions creates production AI, automation, predictive systems, computer vision, and intelligent experiences for organisations in any industry.",
   openGraph: {
     title: "Gratia AI Solutions",
     description:
-      "Where the machine grows — production AI for the industries that run the world.",
+      "Living intelligence for real organisations — designed, deployed, and evolved with your business.",
     images: ["/logo.png"],
   },
 };

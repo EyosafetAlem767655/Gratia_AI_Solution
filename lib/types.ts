@@ -68,6 +68,25 @@ export interface IndustryInfo {
   ships: string[];
 }
 
+export type Solution = {
+  code: string;
+  label: string;
+  description: string;
+  shape: PrimaryShape;
+  outcomes: string[];
+};
+
+/** Public-facing capabilities. Industry remains project metadata, while the
+ * site leads with reusable business outcomes that travel across sectors. */
+export const SOLUTIONS: Solution[] = [
+  { code: "AUT-01", label: "AI Automation", description: "Agents and workflows that remove repetitive work without removing human control.", shape: "gear", outcomes: ["Process agents", "Document intelligence", "Human approvals"] },
+  { code: "OPS-02", label: "Intelligent Operations", description: "Decision systems that connect live operational data to the people running the business.", shape: "factory", outcomes: ["Live copilots", "Anomaly detection", "Resource planning"] },
+  { code: "PRE-03", label: "Predictive Systems", description: "Forecasting and risk models that turn historical signals into earlier, better decisions.", shape: "chart", outcomes: ["Demand forecasts", "Risk signals", "Failure prediction"] },
+  { code: "VIS-04", label: "Computer Vision", description: "Reliable visual intelligence for inspection, measurement, safety, and physical operations.", shape: "cube", outcomes: ["Quality inspection", "Asset monitoring", "Visual search"] },
+  { code: "EXP-05", label: "AI Experiences", description: "Useful, brand-aware interfaces that help customers and teams find answers and take action.", shape: "cart", outcomes: ["Support agents", "Personalisation", "Knowledge systems"] },
+  { code: "BES-06", label: "Bespoke Intelligence", description: "A new AI capability shaped around the problem when an off-the-shelf category does not fit.", shape: "building", outcomes: ["Custom models", "Private deployments", "System integration"] },
+];
+
 export const INDUSTRY_INFO: Record<Industry, IndustryInfo> = {
   industrial: {
     label: "Industrial",

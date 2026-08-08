@@ -6,7 +6,8 @@
  * render loop reads from it, and React never learns anything happened.
  */
 
-export type Quality = "low" | "high";
+export type Quality = "fallback" | "balanced" | "high";
+export type SceneChapter = "awaken" | "connect" | "build" | "prove" | "evolve";
 
 export const sceneState = {
   /** Page scroll, 0 → 1. */
@@ -21,6 +22,8 @@ export const sceneState = {
   smoothY: 0,
   /** Render budget, decided once from the device's capabilities. */
   quality: "high" as Quality,
+  /** False while the browser tab is hidden, allowing animation work to pause. */
+  visible: true,
   /** Narrow viewport: the copy column spans the whole screen, so the scene has
    *  to move out of its way rather than sit behind it. */
   compact: false,
@@ -29,7 +32,8 @@ export const sceneState = {
 /** Scroll positions where the scene settles into each narrative beat.
  *  These are tuned against where the DOM sections actually land, so the
  *  vortex has formed by the time Contact fills the viewport. */
-export const STAGE_ANCHORS = [0.04, 0.28, 0.62, 0.88] as const;
+export const STAGE_ANCHORS = [0.02, 0.23, 0.46, 0.7, 0.9] as const;
+export const SCENE_CHAPTERS: readonly SceneChapter[] = ["awaken", "connect", "build", "prove", "evolve"];
 
 export function smootherstep(t: number): number {
   const x = Math.min(1, Math.max(0, t));
@@ -48,6 +52,10 @@ export function stageFromScroll(scroll: number): number {
     if (scroll <= b) return i + smootherstep((scroll - a) / (b - a));
   }
   return STAGE_ANCHORS.length - 1;
+}
+
+export function chapterFromScroll(scroll: number): SceneChapter {
+  return SCENE_CHAPTERS[Math.round(stageFromScroll(scroll))] ?? "evolve";
 }
 
 /** 0 → 1 ramp across an arbitrary scroll window. */

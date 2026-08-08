@@ -12,6 +12,7 @@ import { Sky } from "./Sky";
 import { Swarm } from "./Swarm";
 import { Terrain } from "./Terrain";
 import { Vines } from "./Vines";
+import { NeuralNetwork } from "./NeuralNetwork";
 import { sceneState } from "./scene-state";
 
 /**
@@ -34,6 +35,9 @@ export function SceneContent({ projectCount }: { projectCount: number }) {
     <>
       <color attach="background" args={["#030a07"]} />
       <fog attach="fog" args={["#030a07", 18, 52]} />
+      <ambientLight intensity={0.12} color="#5ca9a0" />
+      <directionalLight position={[-8, 12, 6]} intensity={0.65} color="#8acdc7" />
+      <pointLight position={[0, 0.5, 2]} intensity={18} distance={16} decay={2} color="#bdf55a" />
 
       {/* Watches real frame times and trades resolution for smoothness before
           the visitor ever notices a dropped frame. */}
@@ -61,6 +65,7 @@ export function SceneContent({ projectCount }: { projectCount: number }) {
       <Swarm />
       <SeedCore />
       <Vines />
+      <NeuralNetwork />
       <Flock />
       <Grove count={projectCount} />
 

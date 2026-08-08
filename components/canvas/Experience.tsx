@@ -33,8 +33,10 @@ function hasWebGL() {
  */
 function StillFrame() {
   return (
-    <div className="fixed inset-0 z-0 bg-deep" aria-hidden>
-      <div className="absolute inset-0 [background:radial-gradient(58%_44%_at_50%_38%,rgba(195,245,60,0.13),transparent_70%)]" />
+    <div className="living-still fixed inset-0 z-0 bg-deep" aria-hidden>
+      <div className="absolute inset-0 bg-[url('/living-intelligence-fallback.webp')] bg-cover bg-[62%_center] opacity-75" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#020706]/95 via-[#020706]/45 to-[#020706]/20" />
+      <div className="absolute inset-0 [background:radial-gradient(58%_44%_at_50%_38%,rgba(82,238,223,0.12),transparent_70%)]" />
       <div className="absolute inset-0 [background:radial-gradient(80%_50%_at_50%_118%,rgba(31,214,155,0.09),transparent_66%)]" />
       <div className="absolute inset-x-0 bottom-0 h-1/2 opacity-[0.12] [background-image:linear-gradient(rgba(150,200,160,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(150,200,160,0.6)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:linear-gradient(to_top,black,transparent)]" />
     </div>
@@ -65,9 +67,10 @@ export function Experience({ projectCount }: { projectCount: number }) {
       // Coarse pointer or few cores: halve the particle budget and the
       // tessellation of the core rather than dropping frames.
       const cores = navigator.hardwareConcurrency ?? 4;
+      const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4;
       const coarse = window.matchMedia("(pointer: coarse)").matches;
       const narrow = window.innerWidth < 820;
-      sceneState.quality = coarse || cores <= 4 || narrow ? "low" : "high";
+      sceneState.quality = coarse || cores <= 4 || memory <= 4 || narrow ? "balanced" : "high";
       sceneState.compact = narrow;
 
       setMode("live");
@@ -100,6 +103,10 @@ export function Experience({ projectCount }: { projectCount: number }) {
       sceneState.pointerY = -((e.clientY / window.innerHeight) * 2 - 1);
     };
 
+    const onVisibility = () => {
+      sceneState.visible = !document.hidden;
+    };
+
     // Damp the pointer and bleed off scroll velocity on a single rAF loop, so
     // the scene keeps easing even when no events are firing.
     let raf = 0;
@@ -115,12 +122,14 @@ export function Experience({ projectCount }: { projectCount: number }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("pointermove", onPointer, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       motionQuery.removeEventListener("change", decide);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("resize", onScroll);
+      document.removeEventListener("visibilitychange", onVisibility);
       cancelAnimationFrame(raf);
     };
   }, []);
@@ -135,7 +144,7 @@ export function Experience({ projectCount }: { projectCount: number }) {
         camera={{ position: [0, 0.6, 8.4], fov: 46, near: 0.1, far: 140 }}
         // Ceiling, not a target: PerformanceMonitor inside the scene lowers
         // this the moment real frame times say it should.
-        dpr={[1, sceneState.quality === "high" ? 1.5 : 1.15]}
+        dpr={[0.85, sceneState.quality === "high" ? 1.5 : 1.1]}
         gl={{
           antialias: false,
           alpha: false,
