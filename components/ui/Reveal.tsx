@@ -53,7 +53,7 @@ export function Reveal({
       depth: { opacity: 0, y: y * 0.45, scale: 0.94, filter: "blur(10px)" },
       scale: { opacity: 0, scale: 0.9 },
     }[variant];
-    gsap.set(el, from);
+    gsap.set(el, { ...from, willChange: "transform, opacity" });
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -67,6 +67,7 @@ export function Reveal({
             duration,
             delay,
             ease: "power3.out",
+            onComplete: () => gsap.set(el, { willChange: "auto" }),
           });
           observer.unobserve(entry.target);
         }
@@ -158,7 +159,7 @@ export function RevealText({
       return;
     }
 
-    gsap.set(targets, { yPercent: 118 });
+    gsap.set(targets, { yPercent: 118, willChange: "transform" });
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -170,6 +171,9 @@ export function RevealText({
             delay,
             stagger,
             ease: "expo.out",
+            // Release the compositor layer once the motion is over. Left on,
+            // it holds stale paint through any later relayout.
+            onComplete: () => gsap.set(targets, { willChange: "auto" }),
           });
           observer.unobserve(entry.target);
         }
@@ -198,7 +202,7 @@ export function RevealText({
             marginBottom: "-0.28em",
           }}
         >
-          <span data-word className="inline-block will-change-transform">
+          <span data-word className="inline-block">
             {word}
             {i < words.length - 1 ? " " : ""}
           </span>

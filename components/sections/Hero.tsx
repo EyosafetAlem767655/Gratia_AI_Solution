@@ -1,136 +1,43 @@
-import { Magnetic } from "@/components/ui/Magnetic";
-import { Marquee } from "@/components/ui/Marquee";
+"use client";
+
 import { Reveal, RevealText } from "@/components/ui/Reveal";
 
 export function Hero() {
   return (
-    <section
-      id="hero"
-      className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden pt-32"
-    >
-      <div className="scrim" aria-hidden />
-
-      <div className="relative z-10 mx-auto grid w-full max-w-[80rem] flex-1 grid-cols-12 items-center gap-y-10 px-[var(--gutter)]">
-        <div className="col-span-12 lg:col-span-7 xl:col-span-6">
-          <Reveal y={14} className="flex items-center gap-3">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lichen opacity-70" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-lichen" />
-            </span>
-            <span className="tag">Gratia AI Solutions · Living intelligence</span>
+    <section id="hero" className="beat">
+      <div className="rails">
+        <div>
+          <Reveal>
+            <p className="tag mb-6">Gratia AI</p>
           </Reveal>
 
-          <h1 className="mt-7 text-[clamp(3rem,9.5vw,7.5rem)] font-semibold">
-            <RevealText
-              as="span"
-              text="Make intelligence"
-              className="grow-type block"
-              delay={0.05}
-            />
-            <RevealText
-              as="span"
-              text="come alive."
-              className="lichen-type block"
-              delay={0.18}
-            />
+          <h1 className="text-[clamp(2.75rem,7vw,5.5rem)]">
+            <RevealText text="Make intelligence" className="block" />
+            <RevealText text="come alive." className="block text-violet" delay={0.1} />
           </h1>
 
-          <Reveal delay={0.45} y={26}>
-            <p className="mt-8 max-w-xl text-lg leading-relaxed text-sage">
-              We create production AI that senses, learns and acts inside your
-              business—from automation and prediction to vision and entirely
-              new intelligent products.
+          <Reveal delay={0.25}>
+            <p className="measure mt-7 text-lg text-muted">
+              Production AI for real operations.
             </p>
           </Reveal>
 
-          <Reveal delay={0.58} y={22}>
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Magnetic>
-                <a href="#contact" className="btn btn-lichen" data-cursor="link">
-                  Start a project
-                  <Arrow />
-                </a>
-              </Magnetic>
-              <a href="#work" className="btn btn-bark" data-cursor="link">
-                  Enter the world
+          <Reveal delay={0.35}>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <a href="#contact" className="btn btn-violet">
+                Start a project
+              </a>
+              <a href="#work" className="btn btn-ghost">
+                See proof
               </a>
             </div>
           </Reveal>
         </div>
 
-        {/* Instrument readout. The rest of this column is deliberately empty so
-            the forge in the WebGL layer has somewhere to live. */}
-        <Reveal
-          delay={0.8}
-          y={0}
-          className="col-span-12 hidden lg:col-span-5 lg:block xl:col-span-6"
-        >
-          <dl className="ml-auto w-fit space-y-4 border-l border-[#142a1c] pl-6">
-            {[
-              ["Practice", "Applied intelligence"],
-              ["System", "Signal → Decision → Action"],
-              ["Terrain", "Any industry · Any scale"],
-            ].map(([term, value]) => (
-              <div key={term}>
-                <dt className="tag">{term}</dt>
-                <dd className="mt-1 font-mono text-sm text-bone">{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </Reveal>
+        {/* Right rail intentionally empty at the hero. The robot owns the
+            frame here and nothing should compete with it. */}
+        <div />
       </div>
-
-      <div className="relative z-10 w-full">
-        <div className="vine" />
-        <Marquee
-          className="py-4 text-[0.7rem] uppercase tracking-[0.28em] text-[#6b8574]"
-          items={[
-            "AI automation",
-            "Intelligent operations",
-            "Predictive systems",
-            "Computer vision",
-            "AI experiences",
-            "Bespoke intelligence",
-            "Seed → Production",
-            "Evaluation & Guardrails",
-            "Bespoke Architectures",
-          ]}
-        />
-        <div className="vine" />
-      </div>
-
-      <ScrollCue />
     </section>
-  );
-}
-
-function ScrollCue() {
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute bottom-28 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 lg:flex"
-    >
-      <span className="tag text-[0.6rem]">Scroll</span>
-      <span className="relative block h-10 w-px overflow-hidden bg-[#142a1c]">
-        <span className="absolute inset-x-0 top-0 h-4 animate-[cue_2.2s_ease-in-out_infinite] bg-lichen" />
-      </span>
-    </div>
-  );
-}
-
-function Arrow() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-4 w-4"
-      aria-hidden
-    >
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
   );
 }

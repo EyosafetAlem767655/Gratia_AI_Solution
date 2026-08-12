@@ -1,76 +1,68 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   GRATIA AI — "BIOFORGE"
-   Where the machine grows.
+   GRATIA AI — "THE FIELD"
 
-   Every AI site is indigo-on-black; every nature site is emerald-on-cream. The
-   brand colour here is neither: LICHEN, a yellow-green taken from the growth
-   that colonises metal left outdoors. It is the exact point where the
-   engineered and the living meet, which is the whole proposition.
+   The page is a caption over a film. A robot stands in a field of glowing
+   violet flowers; everything here exists to stay out of its way.
 
-   Supporting it: JADE for circulation and signal, and MOTH — a warm amber used
-   only where something is alive (eyes, fireflies, wingbeats). Colour is
-   rationed; the rest is bark, moss and forest dark.
+   Three rules govern every layout decision, taken from the video's own
+   composition rather than invented:
+
+   1. Text lives in the sky. The top ~40% of the shot is pure black, so copy
+      sits there and needs no panel behind it.
+   2. The field is never covered. The lower half is the beautiful part.
+   3. The centre column is never covered. The robot stands at 42–58% width.
+
+   The palette is sampled from the footage, so the interface and the film are
+   the same picture. VIOLET is both the flowers and the splash cursor.
    ========================================================================== */
 
 :root {
-  /* Forest dark */
-  --deep: #030a07;
-  --deep-2: #06120c;
-  --bark: #0a1a12;
-  --bark-2: #102718;
-  --moss-line: #1c3626;
-  --moss-line-soft: #142a1c;
+  /* Sampled from the video */
+  --void: #05060a;
+  --deep: #0b0f22;
+  --indigo: #131a3a;
+  --violet: #a855f7;
+  --iris: #5b8cff;
+  --white: #f4f6ff;
+  --muted: #9aa3c7;
 
-  /* Brand */
-  --lichen: #c3f53c;
-  --lichen-soft: #ddff85;
-  --lichen-deep: #7fae15;
-  --jade: #1fd69b;
-  --cyan-life: #52eee0;
-  --jade-deep: #0d8f66;
-  --moth: #ff9e5c;
+  /* The keep-out column. Referenced by the section grid so the robot is
+     protected by a token rather than by remembering a magic number. */
+  --keep-out-start: 42%;
+  --keep-out-end: 58%;
+  /* Copy stays above this line — the horizon in the source framing. */
+  --sky: 40svh;
 
-  /* Text */
-  --bone: #eaf5ec;
-  --sage: #96b0a0;
-  --sage-dim: #6b8574;
-  --on-lichen: #05160c;
-
-  /* Rhythm */
   --gutter: clamp(1.25rem, 4vw, 4rem);
-  --section-y: clamp(6rem, 12vw, 11rem);
 
-  /* Organic geometry — a leaf is asymmetric, and so is every surface here.
-     This one token is doing most of the work of not looking like everyone else. */
-  --leaf: 22px 4px 22px 4px;
-  --leaf-sm: 14px 3px 14px 3px;
-  --leaf-flip: 4px 22px 4px 22px;
-
-  /* Motion */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-grow: cubic-bezier(0.34, 1.3, 0.44, 1);
 
-  --background: var(--deep);
-  --foreground: var(--bone);
+  /* Written every frame by VideoField from scroll progress. Declared here so
+     the first paint is a valid, unfiltered frame rather than a flash of
+     whatever the browser guesses for an unset variable. */
+  --v-scale: 1;
+  --v-brightness: 1;
+  --v-saturate: 1;
+  --v-blur: 0px;
+  --iris-in: 100%;
+  --iris-out: 160%;
+
+  --background: var(--void);
+  --foreground: var(--white);
 }
 
 @theme inline {
-  --color-background: var(--deep);
-  --color-foreground: var(--bone);
+  --color-background: var(--void);
+  --color-foreground: var(--white);
+  --color-void: var(--void);
   --color-deep: var(--deep);
-  --color-deep-2: var(--deep-2);
-  --color-bark: var(--bark);
-  --color-bark-2: var(--bark-2);
-  --color-moss: var(--moss-line);
-  --color-lichen: var(--lichen);
-  --color-lichen-soft: var(--lichen-soft);
-  --color-jade: var(--jade);
-  --color-moth: var(--moth);
-  --color-bone: var(--bone);
-  --color-sage: var(--sage);
-  --color-sage-dim: var(--sage-dim);
+  --color-indigo: var(--indigo);
+  --color-violet: var(--violet);
+  --color-iris: var(--iris);
+  --color-white-soft: var(--white);
+  --color-muted: var(--muted);
 
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
@@ -83,13 +75,13 @@
 
 html {
   scroll-behavior: smooth;
-  background: var(--deep);
+  background: var(--void);
   overscroll-behavior-y: none;
 }
 
 body {
-  background: var(--deep);
-  color: var(--bone);
+  background: var(--void);
+  color: var(--white);
   font-family: var(--font-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -97,403 +89,239 @@ body {
 
 h1,
 h2,
-h3,
-h4 {
+h3 {
   font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.02;
+  letter-spacing: -0.035em;
+  line-height: 1;
   text-wrap: balance;
 }
 
 ::selection {
-  background: var(--lichen);
-  color: var(--on-lichen);
+  background: var(--violet);
+  color: var(--void);
 }
 
 :focus-visible {
-  outline: 2px solid var(--lichen);
+  outline: 2px solid var(--violet);
   outline-offset: 3px;
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar {
-  width: 9px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--deep-2);
+  background: var(--void);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--moss-line);
+  background: var(--indigo);
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--lichen-deep);
+  background: var(--violet);
 }
 
 /* ============================================================================
    Type
    ========================================================================== */
 
-.font-display {
-  font-family: var(--font-display), system-ui, sans-serif;
-}
-
-.font-mono {
-  font-family: var(--font-mono), ui-monospace, monospace;
-}
-
-/* Field-notebook label. Every eyebrow, index and readout on the site. */
 .tag {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.6875rem;
   font-weight: 500;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--sage-dim);
-}
-
-/* Living headline fill. The gradient is shallow on purpose — RevealText gives
-   every word its own gradient box, so a dramatic stop turns short words into
-   unreadable smudges. */
-.grow-type,
-.grow-type [data-word] {
-  background-image: linear-gradient(
-    96deg,
-    var(--bone) 0%,
-    var(--bone) 40%,
-    var(--lichen-soft) 62%,
-    var(--bone) 88%
-  );
-  background-size: 240% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: sap 11s linear infinite;
-}
-
-.lichen-type,
-.lichen-type [data-word] {
-  background-image: linear-gradient(
-    96deg,
-    var(--lichen) 0%,
-    var(--lichen-soft) 38%,
-    var(--jade) 72%,
-    var(--lichen) 100%
-  );
-  background-size: 230% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: sap 8s linear infinite;
-}
-
-.text-outline {
-  color: transparent;
-  -webkit-text-stroke: 1px var(--moss-line);
-}
-
-@keyframes sap {
-  to {
-    background-position: -240% 0;
-  }
+  color: var(--muted);
+  width: fit-content;
 }
 
 /* ============================================================================
-   Surfaces
+   The film
    ========================================================================== */
 
-/* A leaf-shaped panel. Opaque enough to hold small type over a live scene. */
-.panel {
-  position: relative;
-  background: linear-gradient(145deg, color-mix(in srgb, var(--bark) 91%, transparent), color-mix(in srgb, #071d1c 72%, transparent));
-  border: 1px solid var(--moss-line-soft);
-  border-radius: var(--leaf);
-  backdrop-filter: blur(18px) saturate(1.1);
-  -webkit-backdrop-filter: blur(18px) saturate(1.1);
-}
-
-.panel::after {
-  content: "";
-  position: absolute;
+.field-video {
+  position: fixed;
   inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(80% 60% at 100% 0%, color-mix(in srgb, var(--cyan-life) 7%, transparent), transparent 70%);
-  pointer-events: none;
-}
-
-/* Growth line along the top edge — the panel looks fed, not drawn. */
-.panel::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 1px;
-  border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--lichen) 40%, transparent),
-    transparent
-  );
-  pointer-events: none;
-}
-
-/* Cursor-tracked glow. Cards set --mx/--my; the light itself is pure CSS. */
-.spotlight {
-  position: relative;
-  isolation: isolate;
-}
-
-.spotlight::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: radial-gradient(
-    240px circle at var(--mx, 50%) var(--my, 0%),
-    color-mix(in srgb, var(--lichen) 75%, transparent),
-    transparent 66%
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.4s var(--ease-out);
-  pointer-events: none;
-}
-
-.spotlight:hover::after,
-.spotlight:focus-within::after {
-  opacity: 1;
-}
-
-.spotlight-wash {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(
-    300px circle at var(--mx, 50%) var(--my, 0%),
-    color-mix(in srgb, var(--lichen) 8%, transparent),
-    transparent 70%
-  );
-  opacity: 0;
-  transition: opacity 0.45s var(--ease-out);
-  pointer-events: none;
-}
-
-.spotlight:hover .spotlight-wash {
-  opacity: 1;
-}
-
-/* A vine, not a rule: thickest in the middle, tapering to nothing. */
-.vine {
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--moss-line) 18%,
-    color-mix(in srgb, var(--lichen) 34%, transparent) 50%,
-    var(--moss-line) 82%,
-    transparent
-  );
-}
-
-/* ============================================================================
-   Buttons
-   ========================================================================== */
-
-.btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.625rem;
-  padding: 0.9rem 1.7rem;
-  border-radius: var(--leaf-sm);
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.005em;
-  cursor: pointer;
-  overflow: hidden;
-  min-height: 46px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Biases the crop upward so the black sky survives on wide viewports, where
+     `cover` would otherwise trim it and push the flowers into the copy. */
+  object-position: center 38%;
+  transform: scale(var(--v-scale));
+  filter: brightness(var(--v-brightness)) saturate(var(--v-saturate)) blur(var(--v-blur));
+  /* Transform and filter only — never width/height — so scroll never triggers
+     layout, and the video stays on its own compositor layer. */
   transition:
-    color 0.3s var(--ease-out),
-    border-color 0.3s var(--ease-out),
-    box-shadow 0.4s var(--ease-out);
+    transform 0.6s var(--ease-out),
+    filter 0.6s var(--ease-out);
+  will-change: transform, filter;
 }
 
-.btn-lichen {
-  background: var(--lichen);
-  color: var(--on-lichen);
-}
-
-.btn-lichen:hover {
-  box-shadow: 0 12px 42px -10px color-mix(in srgb, var(--lichen) 70%, transparent);
-}
-
-/* Sap running across the face on hover. */
-.btn-lichen::after {
-  content: "";
-  position: absolute;
+/* The iris: a scrim with a hole punched in it, centred on the robot.
+   Deliberately not a mask on the video — compositing a full-bleed video
+   through a mask is expensive, while animating two gradient stops on a flat
+   overlay is close to free. */
+.field-iris {
+  position: fixed;
   inset: 0;
-  background: linear-gradient(
-    100deg,
-    transparent 32%,
-    rgba(255, 255, 255, 0.6) 50%,
-    transparent 68%
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 42%,
+    transparent var(--iris-in),
+    var(--void) var(--iris-out)
   );
-  transform: translateX(-120%);
-  transition: transform 0.75s var(--ease-out);
+  transition: background 0.6s var(--ease-out);
 }
 
-.btn-lichen:hover::after {
-  transform: translateX(120%);
+/* The only thing that ever sits over the picture. It covers sky that is
+   already black, which is why it can be this strong without being felt. */
+.field-sky {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 52svh;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgb(5 6 10 / 0.88) 0%,
+    rgb(5 6 10 / 0.72) 34%,
+    rgb(5 6 10 / 0.3) 68%,
+    transparent 100%
+  );
 }
 
-.btn-bark {
-  border: 1px solid var(--moss-line);
-  color: var(--bone);
-  background: color-mix(in srgb, var(--bark) 55%, transparent);
-  backdrop-filter: blur(10px);
-}
-
-.btn-bark:hover {
-  border-color: color-mix(in srgb, var(--lichen) 55%, transparent);
-  color: var(--lichen-soft);
-}
-
-/* ============================================================================
-   Atmosphere
-   ========================================================================== */
-
-/* Fine organic grain. Kept low — anything you can actually notice lands
-   stripes across body copy. */
+/* Fine grain, tying the DOM and the film into one image. */
 .grain {
   position: fixed;
   inset: 0;
   z-index: 60;
   pointer-events: none;
-  opacity: 0.16;
+  opacity: 0.14;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
 }
 
-/* Canopy vignette. Replaces a full-screen postprocessing pass with a gradient
-   the compositor draws for free. */
-.canopy {
-  position: fixed;
-  inset: 0;
-  z-index: 58;
-  pointer-events: none;
-  background: radial-gradient(
-    118% 78% at 50% 42%,
-    transparent 42%,
-    color-mix(in srgb, var(--deep) 62%, transparent) 82%,
-    var(--deep) 118%
-  );
+/* ============================================================================
+   Layout law
+   ========================================================================== */
+
+/* Every section is a full viewport whose content is pinned into the sky band.
+   `align-content: start` plus the sky height is what keeps copy off the
+   flowers without anyone having to remember to do it per section. */
+.beat {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  align-content: start;
+  padding: clamp(5.5rem, 12svh, 10rem) var(--gutter) 0;
 }
 
-.living-still > :first-child {
-  transform: scale(1.035);
-  animation: still-breathe 18s ease-in-out infinite alternate;
+/* Splits a beat into left and right rails with the robot's column held empty
+   between them. Collapses to a single full-width column on narrow screens,
+   where the robot is small, low, and no longer in the way. */
+.rails {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
 }
 
-@keyframes still-breathe {
-  to { transform: scale(1.075) translate3d(-0.6%, -0.3%, 0); }
+@media (min-width: 900px) {
+  .rails {
+    grid-template-columns:
+      var(--keep-out-start)
+      calc(var(--keep-out-end) - var(--keep-out-start))
+      1fr;
+    gap: 0;
+  }
+  /* The middle cell is the robot. Nothing is ever placed in it. */
+  .rails > :first-child {
+    grid-column: 1;
+    padding-right: 2rem;
+  }
+  .rails > :nth-child(2) {
+    grid-column: 3;
+  }
 }
 
-.scanlines {
-  position: fixed;
-  inset: 0;
-  z-index: 59;
-  pointer-events: none;
-  opacity: 0.035;
-  background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(90, 240, 225, 0.24) 4px);
-}
-
-/* Legibility wash between the live scene and section copy. */
-.scrim {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    120% 78% at 50% 50%,
-    color-mix(in srgb, var(--deep) 62%, transparent) 0%,
-    color-mix(in srgb, var(--deep) 36%, transparent) 48%,
-    transparent 84%
-  );
-}
-
-.scrim-dense {
-  background: radial-gradient(
-    125% 88% at 50% 50%,
-    color-mix(in srgb, var(--deep) 88%, transparent) 0%,
-    color-mix(in srgb, var(--deep) 66%, transparent) 55%,
-    color-mix(in srgb, var(--deep) 22%, transparent) 92%
-  );
+/* Copy must not run under the robot even in the single-column case. */
+.measure {
+  max-width: 34ch;
 }
 
 /* ============================================================================
-   Marquee
+   Controls
    ========================================================================== */
 
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee var(--marquee-duration, 48s) linear infinite;
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.5rem;
+  border-radius: 2px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-height: 44px;
+  cursor: pointer;
+  transition:
+    background 0.3s var(--ease-out),
+    color 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out);
 }
 
-.marquee:hover .marquee-track {
-  animation-play-state: paused;
+.btn-violet {
+  background: var(--violet);
+  color: var(--void);
 }
 
-@keyframes marquee {
-  to {
-    transform: translateX(-50%);
-  }
+.btn-violet:hover {
+  background: var(--white);
 }
 
-/* Slow breath, applied to anything that should read as alive. */
-@keyframes breathe {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.85;
-  }
-  50% {
-    transform: scale(1.08);
-    opacity: 1;
-  }
+.btn-ghost {
+  border: 1px solid rgb(244 246 255 / 0.22);
+  color: var(--white);
 }
 
-.breathe {
-  animation: breathe 4.5s var(--ease-out) infinite;
+.btn-ghost:hover {
+  border-color: var(--violet);
+  color: var(--violet);
 }
 
-/* Hero scroll cue — a seed falling down a stem. */
-@keyframes cue {
-  0% {
-    transform: translateY(-100%);
-  }
-  60%,
-  100% {
-    transform: translateY(320%);
-  }
+/* Underline that grows from the left. Used on every text link so the page has
+   one hover idiom instead of five. */
+.link {
+  position: relative;
+  color: var(--white);
+}
+
+.link::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -3px 0;
+  height: 1px;
+  background: var(--violet);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.link:hover::after,
+.link:focus-visible::after {
+  transform: scaleX(1);
 }
 
 /* ============================================================================
    Reveal — base state lives in CSS so nothing flashes before GSAP boots.
    ========================================================================== */
 
+/* No `will-change` here on purpose. Declared permanently it promotes every
+   revealing element to its own compositor layer for the life of the page, and
+   those layers hold stale paint across a relayout — which printed the headline
+   twice once the webfont loaded and rewrapped it. GSAP applies the hint for
+   the duration of each animation and clears it on completion. */
 [data-reveal] {
   opacity: 0;
-  will-change: transform, opacity;
 }
 
 .no-motion [data-reveal] {
@@ -506,16 +334,8 @@ h4 {
     scroll-behavior: auto;
   }
 
-  .grow-type,
-  .lichen-type,
-  .marquee-track,
-  .breathe,
-  .living-still > :first-child {
-    animation: none;
-  }
-
-  .grow-type {
-    background-position: 30% 0;
+  .field-video {
+    transition: none;
   }
 
   *,

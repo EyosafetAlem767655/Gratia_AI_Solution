@@ -1,16 +1,13 @@
 "use client";
 
-import { Experience } from "@/components/canvas/Experience";
+import { VideoField } from "@/components/VideoField";
 import { Capabilities } from "@/components/sections/Capabilities";
 import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/sections/Footer";
 import { Hero } from "@/components/sections/Hero";
-import { Method } from "@/components/sections/Method";
 import { Work } from "@/components/sections/Work";
-import { Cursor } from "@/components/ui/Cursor";
 import { Nav } from "@/components/ui/Nav";
-import { Preloader } from "@/components/ui/Preloader";
-import { ScrollRail } from "@/components/ui/ScrollRail";
+import SplashCursor from "@/components/ui/SplashCursor";
 import { useProjects } from "@/hooks/useProjects";
 
 export function HomePage() {
@@ -18,27 +15,36 @@ export function HomePage() {
 
   return (
     <>
-      {/* Live WebGL forge, fixed behind everything at -z. */}
-      <Experience projectCount={projects.length} />
+      {/* The film, fixed at z-0 behind everything. */}
+      <VideoField />
 
-      <Preloader />
-      <Cursor />
+      {/* Fluid cursor at z-50; it mounts itself only on a fine pointer with
+          motion allowed. Nav sits above it at z-60. */}
+      <SplashCursor
+        DENSITY_DISSIPATION={3.5}
+        VELOCITY_DISSIPATION={2}
+        PRESSURE={0.1}
+        CURL={3}
+        SPLAT_RADIUS={0.2}
+        SPLAT_FORCE={6000}
+        COLOR_UPDATE_SPEED={10}
+        SHADING
+        RAINBOW_MODE={false}
+        COLOR="#A855F7"
+      />
+
       <Nav />
-      <ScrollRail />
 
       <main id="main" className="relative z-10">
         <Hero />
         <Capabilities />
-        <Method />
         <Work projects={projects} loading={loading} />
         <Contact />
       </main>
 
       <Footer />
 
-      {/* Film stock over the whole page — grain first, scanlines under it. */}
       <div className="grain" aria-hidden />
-      <div className="scanlines" aria-hidden />
     </>
   );
 }

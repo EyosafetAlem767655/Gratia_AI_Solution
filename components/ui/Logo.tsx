@@ -27,13 +27,13 @@ export function LogoMark({
     >
       <defs>
         <linearGradient id="gratia-ring" x1="8" y1="6" x2="40" y2="42">
-          <stop offset="0%" stopColor="var(--lichen)" />
-          <stop offset="55%" stopColor="var(--lichen-soft)" />
-          <stop offset="100%" stopColor="var(--jade)" />
+          <stop offset="0%" stopColor="var(--violet)" />
+          <stop offset="55%" stopColor="#d8b4fe" />
+          <stop offset="100%" stopColor="var(--iris)" />
         </linearGradient>
         <linearGradient id="gratia-leaf" x1="16" y1="34" x2="34" y2="15">
-          <stop offset="0%" stopColor="var(--jade)" />
-          <stop offset="100%" stopColor="var(--lichen)" />
+          <stop offset="0%" stopColor="var(--iris)" />
+          <stop offset="100%" stopColor="var(--violet)" />
         </linearGradient>
       </defs>
 
@@ -80,7 +80,7 @@ export function LogoMark({
           cy={node.cy}
           r="3"
           fill="var(--deep)"
-          stroke="var(--lichen)"
+          stroke="var(--violet)"
           strokeWidth="2"
         >
           {animated && (
@@ -122,10 +122,10 @@ export function Logo({ className = "" }: { className?: string }) {
   return (
     <span className={`inline-flex items-center gap-2.5 ${className}`}>
       <LogoMark className="h-8 w-8 shrink-0" />
-      <span className="font-display text-[1.02rem] font-semibold tracking-[-0.02em] text-bone">
+      <span className="font-display text-[1.02rem] font-semibold tracking-[-0.02em] text-white-soft">
         gratia
-        <span className="text-lichen">.</span>
-        <span className="text-sage">ai</span>
+        <span className="text-violet">.</span>
+        <span className="text-muted">ai</span>
       </span>
     </span>
   );
