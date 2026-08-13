@@ -1,31 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, IBM_Plex_Mono, Manrope } from "next/font/google";
+import { Geist, Silkscreen } from "next/font/google";
 import "./globals.css";
 
-// Bricolage Grotesque for headlines. It has genuinely irregular joints and
-// terminals — grown rather than ruled — which is exactly the tension the brand
-// is about. A neutral grotesk here would flatten the whole idea.
-const display = Bricolage_Grotesque({
-  variable: "--font-display",
+// Geist carries everything. Loaded through next/font rather than a <link> to
+// Google: next/font self-hosts the files and inlines the @font-face, which
+// removes a blocking third-party request and the layout shift that comes with
+// it. That shift was part of why the page felt slow to settle.
+const geist = Geist({
+  variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
-// Manrope carries body copy: geometric enough to sit beside the machinery,
-// round enough to stay warm at small sizes.
-const body = Manrope({
-  variable: "--font-body",
+// Scoped to exactly one element — the stat number. A pixel face used anywhere
+// else would fight the photography.
+const silkscreen = Silkscreen({
+  variable: "--font-pixel",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  display: "swap",
-});
-
-// Every label, index and readout is monospaced, like a field notebook.
-const mono = IBM_Plex_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "700"],
   display: "swap",
 });
 
@@ -45,7 +38,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#030A07",
+  themeColor: "#010101",
   colorScheme: "dark",
 };
 
@@ -57,9 +50,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${display.variable} ${body.variable} ${mono.variable} h-full`}
+      className={`${geist.variable} ${silkscreen.variable} h-full`}
     >
-      <body className="min-h-full bg-deep text-foreground antialiased">
+      <body className="min-h-full bg-ink text-white antialiased">
         {children}
       </body>
     </html>

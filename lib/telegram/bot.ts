@@ -29,7 +29,36 @@ const STEPS = {
   TESTIMONIAL: 4,
 } as const;
 
+/**
+ * Entry point for the webhook.
+ *
+ * Everything below this is allowed to throw. The route that calls us swallows
+ * exceptions and returns 200 — which it must, or Telegram retries the update
+ * forever — but that also means an unhandled failure anywhere in the wizard
+ * reaches the operator as *nothing at all*. A DB session lookup failing on a
+ * bad DATABASE_URL is indistinguishable from the bot being offline.
+ *
+ * So: catch here, and say so in the chat. A visible error is worth far more
+ * than a clean stack trace in a log nobody is tailing.
+ */
 export async function handleTelegramUpdate(update: TelegramUpdate) {
+  const chatId = update.message?.chat.id;
+  try {
+    await route(update);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    console.error("Telegram handler failed:", error);
+    if (chatId === undefined) return;
+    try {
+      await sendTelegramMessage(chatId, `Something broke: ${detail}\n\nTry /cancel, then start again.`);
+    } catch {
+      // The failure was Telegram itself (bad token, network). Nothing further
+      // to try — the console line above is all we get.
+    }
+  }
+}
+
+async function route(update: TelegramUpdate) {
   const message = update.message;
   if (!message?.from) {
     return;
@@ -39,9 +68,23 @@ export async function handleTelegramUpdate(update: TelegramUpdate) {
   const userId = message.from.id;
 
   if (!isAdmin(userId)) {
+    // The rejection carries the sender's own numeric id.
+    //
+    // This bot has exactly one operator, and the only way to configure
+    // TELEGRAM_ADMIN_ID is to know that number — which otherwise means going
+    // and finding @userinfobot. Worse, a misconfigured id looks identical to a
+    // dead bot from the outside: you message it, and it refuses you with no
+    // clue why. Telling people the id they are being judged on turns a dead
+    // end into a one-step fix, and a person's own Telegram id is not a secret
+    // from themselves.
+    const configured = process.env.TELEGRAM_ADMIN_ID;
+    const hint =
+      !configured || configured === "123456789"
+        ? "\n\nTELEGRAM_ADMIN_ID is not configured yet — it is still the placeholder."
+        : "";
     await sendTelegramMessage(
       chatId,
-      "This bot is restricted to Gratia AI administrators.",
+      `This bot is restricted to Gratia AI administrators.\n\nYour Telegram ID is ${userId}. Set TELEGRAM_ADMIN_ID to this value to gain access.${hint}`,
     );
     return;
   }

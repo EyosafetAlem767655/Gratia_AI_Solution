@@ -4,10 +4,13 @@
  *   node scripts/fetch-assets.mjs          # build anything missing
  *   node scripts/fetch-assets.mjs --force  # rebuild everything
  *
- * The source is an 18MB 1928x1072 clip on CloudFront. Shipping that as an
- * autoplaying background would be indefensible, so it is downloaded once into
- * a gitignored scratch directory and re-encoded down to roughly a sixth of the
- * size. Only the encoded output lives in the repo.
+ * The source is a 14.7MB 1920x1080 redwood-forest clip on CloudFront. It is
+ * downloaded once into a gitignored scratch directory; only the processed
+ * output lives in the repo.
+ *
+ * The desktop rendition is a *lossless remux*, not a re-encode — quality is
+ * preserved exactly, as requested. A smaller rendition is generated for
+ * phones, which cannot display the full resolution anyway.
  *
  * Two encoder flags are doing real work and should not be dropped:
  *
@@ -38,9 +41,9 @@ const OUT = join(ROOT, "public/video");
 const SCRATCH = join(ROOT, ".cache/video");
 
 const SOURCE_URL =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260411_104032_69319010-2458-492b-b04d-b40a5dfa4482.mp4";
-const SOURCE = join(SCRATCH, "source.mp4");
-const SOURCE_BYTES = 18_163_484;
+  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260803_192301_9231ed6b-c55c-4a48-909c-4ebe11cf2e11.mp4";
+const SOURCE = join(SCRATCH, "forest-source.mp4");
+const SOURCE_BYTES = 14_669_473;
 
 const force = process.argv.includes("--force");
 
@@ -63,7 +66,7 @@ async function download() {
   }
 
   await mkdir(SCRATCH, { recursive: true });
-  console.log("  get   source.mp4 (18MB, one time)...");
+  console.log("  get   forest-source.mp4 (14.7MB, one time)...");
 
   const response = await fetch(SOURCE_URL);
   if (!response.ok || !response.body) {
@@ -78,23 +81,26 @@ async function download() {
   }
 }
 
-/**
- * CRF 30 is high for general video and correct for this clip: it is a slow,
- * near-static shot of a dark field, so there is very little inter-frame change
- * for the encoder to spend bits on. Raise the number if the target size is
- * missed — do not ship a heavier file.
- */
 const RENDITIONS = [
   {
-    name: "field.mp4",
-    // Height is forced even (`-2`) because H.264 cannot encode odd dimensions.
-    args: ["-vf", "scale=1920:-2", "-crf", "30"],
-    maxBytes: 4_500_000,
+    name: "forest.mp4",
+    // `-c:v copy` — the video stream is passed through untouched, so this is
+    // the *same pixels* as the source at the same bitrate. The only change is
+    // the container: +faststart and no audio track. Quality as-is, by
+    // construction rather than by choosing a gentle CRF.
+    args: ["-c:v", "copy"],
+    maxBytes: 16_000_000,
   },
   {
-    name: "field-sm.mp4",
-    args: ["-vf", "scale=960:-2", "-crf", "31"],
-    maxBytes: 1_800_000,
+    name: "forest-sm.mp4",
+    // The one place a re-encode is justified. A 390px-wide phone cannot
+    // resolve 1080p detail, so dropping to 960 wide costs nothing visible on
+    // the devices that receive it, and saves those devices ~12MB of mobile
+    // data. CRF 26 is high quality — this footage is fine foliage and haze,
+    // which punishes aggressive compression.
+    args: ["-vf", "scale=960:-2", "-c:v", "libx264", "-profile:v", "high",
+           "-pix_fmt", "yuv420p", "-preset", "slow", "-crf", "26"],
+    maxBytes: 4_500_000,
   },
 ];
 
@@ -109,24 +115,20 @@ async function encode({ name, args, maxBytes }) {
     "-y",
     "-i", SOURCE,
     ...args,
-    "-c:v", "libx264",
-    "-profile:v", "high",
-    "-pix_fmt", "yuv420p",
-    "-preset", "slow",
     "-movflags", "+faststart",
     "-an",
     dest,
   ], { maxBuffer: 1 << 26 });
 
   const bytes = await sizeOf(dest);
-  const flag = bytes > maxBytes ? "  <-- OVER BUDGET, raise the CRF" : "";
+  const flag = bytes > maxBytes ? "  <-- OVER BUDGET" : "";
   console.log(`  make  ${name} (${(bytes / 1048576).toFixed(2)}MB)${flag}`);
 }
 
 async function poster() {
-  const dest = join(OUT, "field-poster.jpg");
+  const dest = join(OUT, "forest-poster.jpg");
   if (!force && (await sizeOf(dest)) !== null) {
-    console.log(`  skip  field-poster.jpg`);
+    console.log(`  skip  forest-poster.jpg`);
     return;
   }
   // Sampled a little into the clip rather than at 0s: the very first frame
@@ -140,7 +142,7 @@ async function poster() {
     "-q:v", "4",
     dest,
   ], { maxBuffer: 1 << 26 });
-  console.log(`  make  field-poster.jpg (${((await sizeOf(dest)) / 1024).toFixed(0)}KB)`);
+  console.log(`  make  forest-poster.jpg (${((await sizeOf(dest)) / 1024).toFixed(0)}KB)`);
 }
 
 console.log("Building background video\n");
@@ -151,6 +153,6 @@ for (const rendition of RENDITIONS) await encode(rendition);
 await poster();
 
 const shipped = await Promise.all(
-  ["field.mp4", "field-sm.mp4", "field-poster.jpg"].map((f) => sizeOf(join(OUT, f))),
+  ["forest.mp4", "forest-sm.mp4", "forest-poster.jpg"].map((f) => sizeOf(join(OUT, f))),
 );
 console.log(`\nDone — ${(shipped.reduce((a, b) => a + b, 0) / 1048576).toFixed(2)}MB shipped in public/video.`);

@@ -1,219 +1,180 @@
 "use client";
 
 /**
- * The film behind the page.
+ * The film, fixed behind everything.
  *
- * A single fixed <video> plus two overlays. Scroll drives CSS custom
- * properties on <html>; CSS does the rest. Nothing here re-renders React and
- * nothing touches layout — only `transform` and `filter`, both of which the
- * compositor handles without repainting the video.
+ * PERFORMANCE NOTE — read before adding effects here.
  *
- * Why grade and mask rather than scrubbing `currentTime`: the source clip is a
- * twelve-second, near-static push-in. Mapping scroll onto its timeline would
- * be the literal reading of "integrate with scroll" and would produce almost
- * no visible change, while making every frame depend on decode timing. Moving
- * the grade instead gives real motion and never stutters.
+ * Two separate things made scrolling janky, and both were measured rather than
+ * guessed. Isolating each element during a scripted full-page scroll:
+ *
+ *   video removed entirely ......... 17ms median,  0/90 frames dropped
+ *   SplashCursor removed ........... 57ms median, 87/90 dropped
+ *   backdrop-filter disabled ....... 60ms median, 89/90 dropped
+ *   baseline ....................... 59ms median, 87/90 dropped
+ *
+ * So the glass and the fluid cursor were nearly free; the video was the whole
+ * cost. Narrowing further:
+ *
+ *   animated `filter` on the video .. worst — not a compositor property, so
+ *                                     every frame re-rendered the whole surface
+ *   animated `scale` ................ 66ms median, 88/90 dropped
+ *   static scale, animated translate  17ms median,  3/90 dropped
+ *
+ * The subtle one is `scale`. It *is* a transform, but changing it changes the
+ * layer's rasterisation scale, which forces Chrome to re-rasterise the video
+ * layer every frame and abandons its direct video-compositing fast path.
+ * `translate3d` moves an already-rasterised layer and costs nothing.
+ *
+ * Hence the rules here:
+ *   - scale is STATIC (a fixed overscan, so the edges never show),
+ *   - only `translate3d` and `opacity` are ever animated,
+ *   - no `filter` is animated, ever. A blur must be a static class toggle.
  */
 
 import { useEffect, useRef, useState } from "react";
+import { useBoot } from "./ui/Boot";
 
-type Grade = {
-  scale: number;
-  brightness: number;
-  saturate: number;
-  blur: number;
-  irisIn: number;
-  irisOut: number;
-};
-
-/** Where each beat sits in page scroll, and what the film is doing there. */
-const KEYS: readonly (Grade & { at: number })[] = [
-  // hero — untouched. The shot sells itself.
-  { at: 0.0, scale: 1.0, brightness: 1.0, saturate: 1.0, blur: 0, irisIn: 100, irisOut: 165 },
-  // capabilities — iris closes onto the robot so four words can read
-  { at: 0.3, scale: 1.04, brightness: 0.78, saturate: 1.05, blur: 0, irisIn: 26, irisOut: 74 },
-  // proof — demoted to texture behind the only dense section
-  { at: 0.58, scale: 1.12, brightness: 0.5, saturate: 0.55, blur: 4, irisIn: 60, irisOut: 130 },
-  // contact — reopens, ends where it began
-  { at: 1.0, scale: 1.02, brightness: 0.95, saturate: 1.0, blur: 0, irisIn: 100, irisOut: 170 },
-];
-
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t;
-}
-
-function smootherstep(t: number) {
-  const x = Math.min(1, Math.max(0, t));
-  return x * x * x * (x * (x * 6 - 15) + 10);
-}
-
-function sample(progress: number): Grade {
-  let a = KEYS[0];
-  let b = KEYS[KEYS.length - 1];
-  for (let i = 0; i < KEYS.length - 1; i++) {
-    if (progress >= KEYS[i].at && progress <= KEYS[i + 1].at) {
-      a = KEYS[i];
-      b = KEYS[i + 1];
-      break;
-    }
-  }
-  const t = smootherstep((progress - a.at) / Math.max(0.0001, b.at - a.at));
-  return {
-    scale: lerp(a.scale, b.scale, t),
-    brightness: lerp(a.brightness, b.brightness, t),
-    saturate: lerp(a.saturate, b.saturate, t),
-    blur: lerp(a.blur, b.blur, t),
-    irisIn: lerp(a.irisIn, b.irisIn, t),
-    irisOut: lerp(a.irisOut, b.irisOut, t),
-  };
-}
+/** Below this width we serve the smaller rendition. */
+const SMALL_BREAKPOINT = 820;
 
 export function VideoField() {
-  const [reduced, setReduced] = useState(false);
-  const [narrow, setNarrow] = useState(false);
-  const [ready, setReady] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const video = useRef<HTMLVideoElement>(null);
+  const [mode, setMode] = useState<"pending" | "video" | "still">("pending");
+  const [src, setSrc] = useState<string | null>(null);
+  const { reportVideoReady } = useBoot();
 
   useEffect(() => {
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const small = window.matchMedia("(max-width: 820px)");
-    const sync = () => {
-      setReduced(motion.matches);
-      setNarrow(small.matches);
-      document.documentElement.classList.toggle("no-motion", motion.matches);
-    };
-    sync();
-    motion.addEventListener("change", sync);
-    small.addEventListener("change", sync);
-    return () => {
-      motion.removeEventListener("change", sync);
-      small.removeEventListener("change", sync);
-    };
-  }, []);
-
-  /**
-   * Reveal the video once it can actually paint.
-   *
-   * This cannot be a plain `onCanPlay` prop. The file is small, often cached,
-   * and served from the same origin, so it routinely reaches `canplay` before
-   * React has finished hydrating and attached the listener — the event fires
-   * once, is missed, and never fires again. The video then plays perfectly at
-   * `opacity: 0` behind the poster forever, which is nearly invisible as a bug
-   * because the poster is a frame of the same clip.
-   *
-   * So: check `readyState` first, and only subscribe if it has not got there.
-   */
-  useEffect(() => {
-    if (reduced) return;
-    const video = videoRef.current;
-    if (!video) return;
-
-    // HAVE_FUTURE_DATA — enough buffered to start showing frames.
-    if (video.readyState >= 3) {
-      setReady(true);
-    } else {
-      const onReady = () => setReady(true);
-      video.addEventListener("canplay", onReady, { once: true });
-      return () => video.removeEventListener("canplay", onReady);
-    }
-  }, [reduced, narrow]);
-
-  // The `autoplay` attribute is not always honoured even when muted; nudge it
-  // and swallow the rejection, since a paused first frame is still a valid
-  // (if static) background.
-  useEffect(() => {
-    if (reduced) return;
-    videoRef.current?.play().catch(() => {});
-  }, [reduced, narrow]);
-
-  useEffect(() => {
-    if (reduced) return;
-    let cancelled = false;
-    let kill: (() => void) | undefined;
-
-    import("gsap").then(async ({ gsap }) => {
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      if (cancelled) return;
-      gsap.registerPlugin(ScrollTrigger);
-
-      const root = document.documentElement;
-      const apply = (progress: number) => {
-        const v = sample(progress);
-        root.style.setProperty("--v-scale", v.scale.toFixed(4));
-        root.style.setProperty("--v-brightness", v.brightness.toFixed(4));
-        root.style.setProperty("--v-saturate", v.saturate.toFixed(4));
-        root.style.setProperty("--v-blur", `${v.blur.toFixed(2)}px`);
-        root.style.setProperty("--iris-in", `${v.irisIn.toFixed(2)}%`);
-        root.style.setProperty("--iris-out", `${v.irisOut.toFixed(2)}%`);
-      };
-
-      // No `trigger` property. With one, `start` and `end` resolve against
-      // that element's box; without one they are absolute scroll positions and
-      // `0 -> "max"` is exactly the whole page. Passing
-      // document.documentElement here looks harmless and collapses the range,
-      // pinning progress to 1 on the first scroll event — the film then freezes
-      // on its last beat for the rest of the page.
-      const trigger = ScrollTrigger.create({
-        start: 0,
-        end: "max",
-        onUpdate: (self) => apply(self.progress),
-      });
-
-      apply(0);
-      kill = () => trigger.kill();
+    // Deferred a frame rather than run in the effect body. Setting state
+    // synchronously here cascades an extra render before paint; the boot veil
+    // is covering the screen at this point, so a single frame costs nothing.
+    const id = requestAnimationFrame(() => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        setMode("still");
+        reportVideoReady();
+        return;
+      }
+      // Chosen once here rather than with a <source media> query: the browser
+      // picks a <source> before layout, and getting it wrong means downloading
+      // 14MB onto a phone.
+      setSrc(
+        window.innerWidth < SMALL_BREAKPOINT
+          ? "/video/forest-sm.mp4"
+          : "/video/forest.mp4",
+      );
+      setMode("video");
     });
+    return () => cancelAnimationFrame(id);
+  }, [reportVideoReady]);
 
+  // Tell the boot gate when the first frames are decodable. Checking
+  // readyState first matters: for a cached or fast-arriving file the event can
+  // fire before React attaches the listener, and then it never fires again —
+  // which would hold the veil up until the timeout every single time.
+  useEffect(() => {
+    const el = video.current;
+    if (mode !== "video" || !el) return;
+
+    if (el.readyState >= 3) {
+      reportVideoReady();
+      return;
+    }
+    const onReady = () => reportVideoReady();
+    el.addEventListener("canplay", onReady, { once: true });
+    // Belt and braces: if the network stalls entirely, `error` still releases
+    // the gate rather than leaving the visitor staring at the brand screen.
+    el.addEventListener("error", onReady, { once: true });
     return () => {
-      cancelled = true;
-      kill?.();
+      el.removeEventListener("canplay", onReady);
+      el.removeEventListener("error", onReady);
     };
-  }, [reduced]);
+  }, [mode, reportVideoReady]);
 
-  // Reduced motion: the poster, and nothing that moves. No video element is
-  // created at all, so no decode work happens either.
-  if (reduced) {
-    return (
-      <div className="fixed inset-0 z-0 bg-void" aria-hidden>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/video/field-poster.jpg"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover [object-position:center_38%]"
-        />
-        <div className="field-sky" />
-      </div>
-    );
-  }
+  // Scroll → CSS custom properties on <html>. Written outside React so scroll
+  // never triggers a render; the compositor reads them from CSS.
+  useEffect(() => {
+    if (mode !== "video") return;
+
+    let frame = 0;
+    const apply = () => {
+      frame = 0;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      const root = document.documentElement.style;
+      // A slow vertical drift, and a scrim that deepens as the content gets
+      // denser then eases back for the closing section. The drift is a
+      // percentage of the element's own height, which the static overscan
+      // below leaves room for.
+      root.setProperty("--v-shift", `${(-p * 5).toFixed(3)}%`);
+      // Monotonic, not a bell curve. An earlier version used sin(pπ), which
+      // peaked mid-page and fell back to nothing by the end — meaning Contact,
+      // the most text-dense section on the site, got the *least* dimming and
+      // its form sat unreadable over the bright centre of the frame. The film
+      // should recede as the page gets denser and stay back.
+      const eased = p * p * (3 - 2 * p);
+      root.setProperty("--v-dim", (0.12 + eased * 0.62).toFixed(4));
+    };
+
+    const onScroll = () => {
+      // Coalesce to one write per frame. Scroll fires far more often than the
+      // display refreshes, and doing this work per event is pure waste.
+      if (!frame) frame = requestAnimationFrame(apply);
+    };
+
+    apply();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [mode]);
 
   return (
-    <div className="fixed inset-0 z-0 bg-void" aria-hidden>
-      <video
-        // `key` forces a remount when the rendition changes, because swapping
-        // a <source> alone does not make an already-loaded video reload.
-        key={narrow ? "sm" : "lg"}
-        ref={videoRef}
-        className="field-video"
-        src={narrow ? "/video/field-sm.mp4" : "/video/field.mp4"}
-        poster="/video/field-poster.jpg"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        style={{ opacity: ready ? 1 : 0, transition: "opacity 1.2s ease-out" }}
-      />
-      {/* Poster underneath, revealed until the first frame can paint. Keeps the
-          hero from opening on a black rectangle on a slow connection. */}
-      {!ready && (
-        // eslint-disable-next-line @next/next/no-img-element
+    <div className="fixed inset-0 z-0 overflow-hidden bg-ink" aria-hidden>
+      {mode === "video" && src ? (
+        <video
+          ref={video}
+          className="h-full w-full object-cover"
+          style={{
+            // The 1.1 scale is a constant, never animated — it is the overscan
+            // that gives the drift somewhere to travel without exposing an
+            // edge. Only the translate changes.
+            transform: "scale(1.1) translate3d(0, var(--v-shift, 0%), 0)",
+            transformOrigin: "center 45%",
+            // Promote to its own layer up front so the drift never triggers a
+            // re-raster mid-scroll.
+            willChange: "transform",
+          }}
+          src={src}
+          poster="/video/forest-poster.jpg"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+        />
+      ) : (
+        /* eslint-disable-next-line @next/next/no-img-element */
         <img
-          src="/video/field-poster.jpg"
+          src="/video/forest-poster.jpg"
           alt=""
-          className="absolute inset-0 -z-10 h-full w-full object-cover [object-position:center_38%]"
+          className="h-full w-full object-cover"
         />
       )}
-      <div className="field-iris" />
-      <div className="field-sky" />
+
+      {/* Dimming scrim. Opacity only — the cheap way to make the film recede. */}
+      <div
+        className="absolute inset-0 bg-ink"
+        style={{ opacity: "var(--v-dim, 0.15)" }}
+      />
+
+      {/* Fixed vignette. Deepest at the bottom, where the copy sits, and at the
+          edges — which is where this footage is already darkest, so it reads as
+          the frame falling off rather than as an overlay. */}
+      <div className="pointer-events-none absolute inset-0 [background:radial-gradient(120%_90%_at_50%_35%,transparent_35%,rgba(1,1,1,0.55)_100%)]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 [background:linear-gradient(to_top,rgba(1,1,1,0.85),transparent)]" />
     </div>
   );
 }

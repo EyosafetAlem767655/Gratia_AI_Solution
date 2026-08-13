@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!--
+    The browser-tab icon, drawn from the same geometry as <LogoMark> in
+    components/ui/Logo.tsx — the mark shown on the loading screen. Kept as a
+    separate file rather than imported because a favicon cannot inherit
+    `currentColor` from a page, so the colours are resolved here: white glyph
+    on the site's ink background, which is what the loading screen shows.
+
+    If the mark changes, change it in both places.
+  -->
+  <rect width="48" height="48" rx="10" fill="#010101"/>
+  <g transform="translate(24 24) scale(0.78) translate(-24 -24)">
+    <!-- The G's bowl: one stroke with a measured gap, so the counter reads as
+         an aperture rather than a broken circle. -->
+    <circle cx="24" cy="24" r="19" fill="none" stroke="#ffffff" stroke-width="3"
+            stroke-linecap="round" pathLength="100" stroke-dasharray="79 21"
+            transform="rotate(-31 24 24)"/>
+    <!-- The G's crossbar, entering from the aperture. -->
+    <path d="M43 24 H31" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <!-- Circuit taps on the ring. -->
+    <circle cx="24" cy="5" r="3" fill="#ffffff" opacity="0.9"/>
+    <circle cx="7.6" cy="33.5" r="3" fill="#ffffff" opacity="0.9"/>
+    <circle cx="31" cy="41" r="3" fill="#ffffff" opacity="0.9"/>
+    <!-- The living core. -->
+    <path d="M16 33C16 23.6 22.6 17 32 17C32 26.4 25.4 33 16 33Z"
+          fill="#ffffff" opacity="0.55"/>
+  </g>
+</svg>

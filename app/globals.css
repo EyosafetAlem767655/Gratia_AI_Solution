@@ -1,72 +1,52 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   GRATIA AI — "THE FIELD"
+   GRATIA AI — over the forest
 
-   The page is a caption over a film. A robot stands in a field of glowing
-   violet flowers; everything here exists to stay out of its way.
+   The page is a caption on a photograph. The background film is a redwood
+   forest: warm amber bark, sage foliage, hazy sun. So the interface carries no
+   colour of its own — it is black, white and frosted glass, and every hue on
+   screen comes from the footage.
 
-   Three rules govern every layout decision, taken from the video's own
-   composition rather than invented:
+   That is a deliberate reversal of the palette this file used to hold. A violet
+   accent over warm amber and green fought the image on every frame. Neutral
+   chrome lets the film be the colour.
 
-   1. Text lives in the sky. The top ~40% of the shot is pure black, so copy
-      sits there and needs no panel behind it.
-   2. The field is never covered. The lower half is the beautiful part.
-   3. The centre column is never covered. The robot stands at 42–58% width.
-
-   The palette is sampled from the footage, so the interface and the film are
-   the same picture. VIOLET is both the flowers and the splash cursor.
+   The one rule worth knowing before editing: this video is BRIGHT in the
+   upper-centre (sun between the trunks) and DARK at the left, right and
+   bottom edges. White text is unreadable against the bright centre, so content
+   is bottom-anchored and flips from near-black on small screens to white on
+   large ones, where the crop puts darker frame under the copy.
    ========================================================================== */
 
 :root {
-  /* Sampled from the video */
-  --void: #05060a;
-  --deep: #0b0f22;
-  --indigo: #131a3a;
-  --violet: #a855f7;
-  --iris: #5b8cff;
-  --white: #f4f6ff;
-  --muted: #9aa3c7;
+  /* Ink — the near-black used for type over bright parts of the frame, and as
+     the page colour behind/below the video. */
+  --ink: #010101;
+  --ink-2: #0b0b0c;
 
-  /* The keep-out column. Referenced by the section grid so the robot is
-     protected by a token rather than by remembering a magic number. */
-  --keep-out-start: 42%;
-  --keep-out-end: 58%;
-  /* Copy stays above this line — the horizon in the source framing. */
-  --sky: 40svh;
+  /* The CTA gradient. One gradient, used by every primary button. */
+  --cta-from: #2b2b2b;
+  --cta-to: #101010;
 
-  --gutter: clamp(1.25rem, 4vw, 4rem);
+  /* Rhythm */
+  --gutter: clamp(1.25rem, 4vw, 3rem);
 
+  /* Motion. One curve for entrances, one for the drawer. */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Written every frame by VideoField from scroll progress. Declared here so
-     the first paint is a valid, unfiltered frame rather than a flash of
-     whatever the browser guesses for an unset variable. */
-  --v-scale: 1;
-  --v-brightness: 1;
-  --v-saturate: 1;
-  --v-blur: 0px;
-  --iris-in: 100%;
-  --iris-out: 160%;
-
-  --background: var(--void);
-  --foreground: var(--white);
+  --background: var(--ink);
+  --foreground: #ffffff;
 }
 
 @theme inline {
-  --color-background: var(--void);
-  --color-foreground: var(--white);
-  --color-void: var(--void);
-  --color-deep: var(--deep);
-  --color-indigo: var(--indigo);
-  --color-violet: var(--violet);
-  --color-iris: var(--iris);
-  --color-white-soft: var(--white);
-  --color-muted: var(--muted);
+  --color-background: var(--ink);
+  --color-foreground: var(--foreground);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
 
-  --font-sans: var(--font-body);
-  --font-display: var(--font-display);
-  --font-mono: var(--font-mono);
+  --font-sans: var(--font-sans);
+  --font-pixel: var(--font-pixel);
 }
 
 * {
@@ -74,268 +54,96 @@
 }
 
 html {
-  scroll-behavior: smooth;
-  background: var(--void);
+  background: var(--ink);
+  /* No `scroll-behavior: smooth`. It fights programmatic scrolling and makes
+     anchor jumps feel laggy on a page whose background is already moving. */
   overscroll-behavior-y: none;
 }
 
 body {
-  background: var(--void);
-  color: var(--white);
-  font-family: var(--font-body), system-ui, sans-serif;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-h1,
-h2,
-h3 {
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  line-height: 1;
-  text-wrap: balance;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: var(--violet);
-  color: var(--void);
+  background: #fff;
+  color: var(--ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--violet);
+  outline: 2px solid #fff;
   outline-offset: 3px;
-  border-radius: 2px;
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--void);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--indigo);
-  border-radius: 99px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--violet);
+  border-radius: 4px;
 }
 
 /* ============================================================================
-   Type
+   Primitives
    ========================================================================== */
 
-.tag {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--muted);
-  width: fit-content;
+/* The primary button. Exactly one gradient across the whole site. */
+.btn-cta {
+  background: linear-gradient(to bottom, var(--cta-from), var(--cta-to));
+  color: #fff;
+  transition: opacity 0.2s ease;
+}
+
+.btn-cta:hover {
+  opacity: 0.9;
+}
+
+/* Frosted panel. `backdrop-filter` is set once here rather than per component
+   so the blur radius stays consistent — mismatched blurs across neighbouring
+   cards is the fastest way to make glassmorphism look cheap. */
+.glass {
+  background: rgb(255 255 255 / 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 /* ============================================================================
-   The film
+   Boot
+
+   The page is held behind a brand screen until fonts, the video's first frames
+   and the projects fetch have all settled, then revealed in one motion. The
+   base state lives in CSS so there is no flash before the JS boots.
    ========================================================================== */
 
-.field-video {
+[data-boot-veil] {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Biases the crop upward so the black sky survives on wide viewports, where
-     `cover` would otherwise trim it and push the flowers into the copy. */
-  object-position: center 38%;
-  transform: scale(var(--v-scale));
-  filter: brightness(var(--v-brightness)) saturate(var(--v-saturate)) blur(var(--v-blur));
-  /* Transform and filter only — never width/height — so scroll never triggers
-     layout, and the video stays on its own compositor layer. */
-  transition:
-    transform 0.6s var(--ease-out),
-    filter 0.6s var(--ease-out);
-  will-change: transform, filter;
-}
-
-/* The iris: a scrim with a hole punched in it, centred on the robot.
-   Deliberately not a mask on the video — compositing a full-bleed video
-   through a mask is expensive, while animating two gradient stops on a flat
-   overlay is close to free. */
-.field-iris {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    circle at 50% 42%,
-    transparent var(--iris-in),
-    var(--void) var(--iris-out)
-  );
-  transition: background 0.6s var(--ease-out);
-}
-
-/* The only thing that ever sits over the picture. It covers sky that is
-   already black, which is why it can be this strong without being felt. */
-.field-sky {
-  position: fixed;
-  inset: 0 0 auto 0;
-  height: 52svh;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgb(5 6 10 / 0.88) 0%,
-    rgb(5 6 10 / 0.72) 34%,
-    rgb(5 6 10 / 0.3) 68%,
-    transparent 100%
-  );
-}
-
-/* Fine grain, tying the DOM and the film into one image. */
-.grain {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  pointer-events: none;
-  opacity: 0.14;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-}
-
-/* ============================================================================
-   Layout law
-   ========================================================================== */
-
-/* Every section is a full viewport whose content is pinned into the sky band.
-   `align-content: start` plus the sky height is what keeps copy off the
-   flowers without anyone having to remember to do it per section. */
-.beat {
-  position: relative;
-  min-height: 100svh;
+  z-index: 100;
   display: grid;
-  align-content: start;
-  padding: clamp(5.5rem, 12svh, 10rem) var(--gutter) 0;
+  place-items: center;
+  background: var(--ink);
+  transition: opacity 0.6s var(--ease-out), visibility 0.6s;
 }
 
-/* Splits a beat into left and right rails with the robot's column held empty
-   between them. Collapses to a single full-width column on narrow screens,
-   where the robot is small, low, and no longer in the way. */
-.rails {
-  display: grid;
-  gap: 2rem;
-  grid-template-columns: 1fr;
+[data-boot-veil][data-done="true"] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
-@media (min-width: 900px) {
-  .rails {
-    grid-template-columns:
-      var(--keep-out-start)
-      calc(var(--keep-out-end) - var(--keep-out-start))
-      1fr;
-    gap: 0;
-  }
-  /* The middle cell is the robot. Nothing is ever placed in it. */
-  .rails > :first-child {
-    grid-column: 1;
-    padding-right: 2rem;
-  }
-  .rails > :nth-child(2) {
-    grid-column: 3;
-  }
-}
-
-/* Copy must not run under the robot even in the single-column case. */
-.measure {
-  max-width: 34ch;
-}
-
-/* ============================================================================
-   Controls
-   ========================================================================== */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.85rem 1.5rem;
-  border-radius: 2px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  min-height: 44px;
-  cursor: pointer;
-  transition:
-    background 0.3s var(--ease-out),
-    color 0.3s var(--ease-out),
-    border-color 0.3s var(--ease-out);
-}
-
-.btn-violet {
-  background: var(--violet);
-  color: var(--void);
-}
-
-.btn-violet:hover {
-  background: var(--white);
-}
-
-.btn-ghost {
-  border: 1px solid rgb(244 246 255 / 0.22);
-  color: var(--white);
-}
-
-.btn-ghost:hover {
-  border-color: var(--violet);
-  color: var(--violet);
-}
-
-/* Underline that grows from the left. Used on every text link so the page has
-   one hover idiom instead of five. */
-.link {
-  position: relative;
-  color: var(--white);
-}
-
-.link::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 -3px 0;
-  height: 1px;
-  background: var(--violet);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s var(--ease-out);
-}
-
-.link:hover::after,
-.link:focus-visible::after {
-  transform: scaleX(1);
-}
-
-/* ============================================================================
-   Reveal — base state lives in CSS so nothing flashes before GSAP boots.
-   ========================================================================== */
-
-/* No `will-change` here on purpose. Declared permanently it promotes every
-   revealing element to its own compositor layer for the life of the page, and
-   those layers hold stale paint across a relayout — which printed the headline
-   twice once the webfont loaded and rewrapped it. GSAP applies the hint for
-   the duration of each animation and clears it on completion. */
+/* Content starts hidden and is revealed on boot as one staggered entrance,
+   NOT per-element on scroll. Scroll-gated reveals were why the page felt like
+   it was assembling itself underneath you as you moved. */
 [data-reveal] {
   opacity: 0;
 }
 
-.no-motion [data-reveal] {
+.no-motion [data-reveal],
+.booted-instant [data-reveal] {
   opacity: 1 !important;
   transform: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  .field-video {
-    transition: none;
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   *,

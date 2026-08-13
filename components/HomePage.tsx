@@ -6,7 +6,7 @@ import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/sections/Footer";
 import { Hero } from "@/components/sections/Hero";
 import { Work } from "@/components/sections/Work";
-import { Nav } from "@/components/ui/Nav";
+import { BootProvider } from "@/components/ui/Boot";
 import SplashCursor from "@/components/ui/SplashCursor";
 import { useProjects } from "@/hooks/useProjects";
 
@@ -14,12 +14,16 @@ export function HomePage() {
   const { projects, loading } = useProjects();
 
   return (
-    <>
+    // BootProvider holds the page behind a brand screen until fonts and the
+    // film's first frames are ready, then reveals everything in one motion.
+    // Every Reveal on the page animates from that single signal rather than
+    // from its own scroll observer.
+    <BootProvider>
       {/* The film, fixed at z-0 behind everything. */}
       <VideoField />
 
       {/* Fluid cursor at z-50; it mounts itself only on a fine pointer with
-          motion allowed. Nav sits above it at z-60. */}
+          motion allowed. The hero's nav sits above it. */}
       <SplashCursor
         DENSITY_DISSIPATION={3.5}
         VELOCITY_DISSIPATION={2}
@@ -33,18 +37,14 @@ export function HomePage() {
         COLOR="#A855F7"
       />
 
-      <Nav />
-
       <main id="main" className="relative z-10">
-        <Hero />
+        <Hero projects={projects} loading={loading} />
         <Capabilities />
         <Work projects={projects} loading={loading} />
         <Contact />
       </main>
 
       <Footer />
-
-      <div className="grain" aria-hidden />
-    </>
+    </BootProvider>
   );
 }

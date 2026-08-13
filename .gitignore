@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Scratch space for the video build (source clip, ~18MB)
 .cache/
+
+.vercel
+.env*

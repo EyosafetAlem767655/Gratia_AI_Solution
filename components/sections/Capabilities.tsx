@@ -1,60 +1,49 @@
 "use client";
 
-import { Reveal, RevealGroup } from "@/components/ui/Reveal";
+import { Reveal } from "@/components/ui/Reveal";
 
 /**
  * Four words.
  *
  * The six entries in `SOLUTIONS` (lib/types.ts) are collapsed to four
  * groupings here on purpose: this beat is a list of capabilities, not a
- * catalogue, and six lines would push copy out of the sky band and onto the
- * flowers. The detail line is one short sentence, revealed on hover or focus
- * rather than always printed.
+ * catalogue. The detail line is one short sentence — enough to be concrete,
+ * short enough that the film still carries the screen.
  */
 const CAPABILITIES = [
   { word: "Automation", line: "Agents that remove repetitive work." },
   { word: "Prediction", line: "Forecasts and risk, early enough to act on." },
-  { word: "Vision", line: "Inspection and monitoring that actually holds up." },
+  { word: "Vision", line: "Inspection and monitoring that holds up in the field." },
   { word: "Bespoke", line: "A new capability when nothing off-the-shelf fits." },
 ] as const;
 
 export function Capabilities() {
   return (
-    <section id="capabilities" className="beat">
-      <div className="rails">
-        <div>
-          <Reveal>
-            <p className="tag mb-8">What we build</p>
-          </Reveal>
+    <section
+      id="capabilities"
+      className="relative flex min-h-[78svh] items-center px-5 pb-6 pt-24 sm:px-8 lg:px-12"
+    >
+      <div className="mx-auto w-full max-w-5xl">
+        <Reveal>
+          <p className="mb-10 text-xs font-medium uppercase tracking-[0.25em] text-white/50">
+            What we build
+          </p>
+        </Reveal>
 
-          <RevealGroup as="ul" className="space-y-1">
-            {CAPABILITIES.map(({ word, line }) => (
-              <li key={word} className="group">
-                <button
-                  type="button"
-                  className="block w-full cursor-default text-left"
-                  aria-describedby={`cap-${word}`}
-                >
-                  <span className="font-display text-[clamp(1.75rem,3.6vw,2.75rem)] font-semibold tracking-[-0.03em] text-white-soft transition-colors duration-300 group-hover:text-violet group-focus-within:text-violet">
-                    {word}
-                  </span>
-                  {/* Collapsed to zero height until hover/focus, so the resting
-                      state is four words and nothing else. */}
-                  <span
-                    id={`cap-${word}`}
-                    className="grid grid-rows-[0fr] text-sm text-muted transition-[grid-template-rows] duration-400 ease-out group-hover:grid-rows-[1fr] group-focus-within:grid-rows-[1fr]"
-                  >
-                    <span className="overflow-hidden">
-                      <span className="block pt-1">{line}</span>
-                    </span>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </RevealGroup>
-        </div>
-
-        <div />
+        <ul className="space-y-6 sm:space-y-8">
+          {CAPABILITIES.map((item, i) => (
+            <Reveal as="li" key={item.word} delay={0.06 * i}>
+              <div className="group flex flex-col gap-1 border-b border-white/10 pb-6 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
+                <h3 className="text-2xl font-semibold tracking-tight sm:text-3xl lg:text-4xl">
+                  {item.word}
+                </h3>
+                <p className="max-w-xs text-sm leading-relaxed text-white/60 transition-colors group-hover:text-white/90">
+                  {item.line}
+                </p>
+              </div>
+            </Reveal>
+          ))}
+        </ul>
       </div>
     </section>
   );
