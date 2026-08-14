@@ -23,7 +23,7 @@ export function Work({
     >
       <div className="mx-auto w-full max-w-5xl">
         <Reveal>
-          <p className="mb-10 text-xs font-medium uppercase tracking-[0.25em] text-white/50">
+          <p className="mb-10 text-xs font-medium uppercase tracking-[0.25em] text-white/70">
             Proof
           </p>
         </Reveal>
@@ -38,7 +38,7 @@ export function Work({
             ))}
           </div>
         ) : projects.length === 0 ? (
-          <Reveal delay={0.1}>
+          <Reveal>
             {/* An honest line rather than fabricated case studies. Projects
                 appear here automatically once published from the bot. */}
             <p className="max-w-md text-lg leading-relaxed text-white/60">
@@ -47,8 +47,8 @@ export function Work({
           </Reveal>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {projects.map((project, i) => (
-              <Reveal key={project.id} delay={0.05 * i}>
+            {projects.map((project) => (
+              <Reveal key={project.id}>
                 <article className="glass h-full rounded-2xl p-5 transition-colors duration-300 hover:bg-white/[0.14]">
                   <h3 className="text-lg font-semibold">{project.companyName}</h3>
                   {project.industry && (

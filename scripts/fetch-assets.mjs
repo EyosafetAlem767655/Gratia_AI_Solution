@@ -4,7 +4,8 @@
  *   node scripts/fetch-assets.mjs          # build anything missing
  *   node scripts/fetch-assets.mjs --force  # rebuild everything
  *
- * The source is a 14.7MB 1920x1080 redwood-forest clip on CloudFront. It is
+ * The source is an 18.2MB 1928x1072 clip on CloudFront — a humanoid robot
+ * standing in a field of light. It is
  * downloaded once into a gitignored scratch directory; only the processed
  * output lives in the repo.
  *
@@ -41,9 +42,9 @@ const OUT = join(ROOT, "public/video");
 const SCRATCH = join(ROOT, ".cache/video");
 
 const SOURCE_URL =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260803_192301_9231ed6b-c55c-4a48-909c-4ebe11cf2e11.mp4";
-const SOURCE = join(SCRATCH, "forest-source.mp4");
-const SOURCE_BYTES = 14_669_473;
+  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260411_104032_69319010-2458-492b-b04d-b40a5dfa4482.mp4";
+const SOURCE = join(SCRATCH, "hero-source.mp4");
+const SOURCE_BYTES = 18_163_484;
 
 const force = process.argv.includes("--force");
 
@@ -61,12 +62,12 @@ async function download() {
   // right file. A partial download from an aborted run would otherwise be
   // kept forever and every encode would silently work from a truncated clip.
   if (!force && existing !== null && Math.abs(existing - SOURCE_BYTES) / SOURCE_BYTES < 0.02) {
-    console.log(`  skip  source.mp4 (${(existing / 1048576).toFixed(2)}MB)`);
+    console.log(`  skip  hero-source.mp4 (${(existing / 1048576).toFixed(2)}MB)`);
     return;
   }
 
   await mkdir(SCRATCH, { recursive: true });
-  console.log("  get   forest-source.mp4 (14.7MB, one time)...");
+  console.log("  get   hero-source.mp4 (18.2MB, one time)...");
 
   const response = await fetch(SOURCE_URL);
   if (!response.ok || !response.body) {
@@ -83,16 +84,16 @@ async function download() {
 
 const RENDITIONS = [
   {
-    name: "forest.mp4",
+    name: "hero.mp4",
     // `-c:v copy` — the video stream is passed through untouched, so this is
     // the *same pixels* as the source at the same bitrate. The only change is
     // the container: +faststart and no audio track. Quality as-is, by
     // construction rather than by choosing a gentle CRF.
     args: ["-c:v", "copy"],
-    maxBytes: 16_000_000,
+    maxBytes: 19_000_000,
   },
   {
-    name: "forest-sm.mp4",
+    name: "hero-sm.mp4",
     // The one place a re-encode is justified. A 390px-wide phone cannot
     // resolve 1080p detail, so dropping to 960 wide costs nothing visible on
     // the devices that receive it, and saves those devices ~12MB of mobile
@@ -126,9 +127,9 @@ async function encode({ name, args, maxBytes }) {
 }
 
 async function poster() {
-  const dest = join(OUT, "forest-poster.jpg");
+  const dest = join(OUT, "hero-poster.jpg");
   if (!force && (await sizeOf(dest)) !== null) {
-    console.log(`  skip  forest-poster.jpg`);
+    console.log(`  skip  hero-poster.jpg`);
     return;
   }
   // Sampled a little into the clip rather than at 0s: the very first frame
@@ -142,7 +143,7 @@ async function poster() {
     "-q:v", "4",
     dest,
   ], { maxBuffer: 1 << 26 });
-  console.log(`  make  forest-poster.jpg (${((await sizeOf(dest)) / 1024).toFixed(0)}KB)`);
+  console.log(`  make  hero-poster.jpg (${((await sizeOf(dest)) / 1024).toFixed(0)}KB)`);
 }
 
 console.log("Building background video\n");
@@ -153,6 +154,6 @@ for (const rendition of RENDITIONS) await encode(rendition);
 await poster();
 
 const shipped = await Promise.all(
-  ["forest.mp4", "forest-sm.mp4", "forest-poster.jpg"].map((f) => sizeOf(join(OUT, f))),
+  ["hero.mp4", "hero-sm.mp4", "hero-poster.jpg"].map((f) => sizeOf(join(OUT, f))),
 );
 console.log(`\nDone — ${(shipped.reduce((a, b) => a + b, 0) / 1048576).toFixed(2)}MB shipped in public/video.`);

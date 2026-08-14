@@ -1,22 +1,23 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   GRATIA AI — over the forest
+   GRATIA AI
 
-   The page is a caption on a photograph. The background film is a redwood
-   forest: warm amber bark, sage foliage, hazy sun. So the interface carries no
-   colour of its own — it is black, white and frosted glass, and every hue on
-   screen comes from the footage.
+   The page is a caption on a photograph. The hero film is a humanoid robot
+   standing in a field of light, so the interface carries no colour of its own —
+   black, white and frosted glass — and every hue on screen comes from the
+   footage.
 
-   That is a deliberate reversal of the palette this file used to hold. A violet
-   accent over warm amber and green fought the image on every frame. Neutral
-   chrome lets the film be the colour.
+   ONE RULE, and it is the opposite of what this file said a version ago. The
+   forest clip was bright in the middle and dark at the edges, so copy was
+   bottom-anchored and flipped to near-black on small screens. This clip is
+   inverted: a PURE BLACK SKY across the top, DENSE BRIGHT FLOWERS across the
+   bottom. Bottom-anchored white text would sit directly on the brightest part
+   of the frame.
 
-   The one rule worth knowing before editing: this video is BRIGHT in the
-   upper-centre (sun between the trunks) and DARK at the left, right and
-   bottom edges. White text is unreadable against the bright centre, so content
-   is bottom-anchored and flips from near-black on small screens to white on
-   large ones, where the crop puts darker frame under the copy.
+   So: a hard bottom scrim carries the copy, and text is white everywhere. The
+   per-breakpoint colour flip is gone — with a scrim the ground is dark at every
+   size, and one text colour is one less thing to keep consistent.
    ========================================================================== */
 
 :root {
@@ -45,8 +46,11 @@
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
 
-  --font-sans: var(--font-sans);
-  --font-pixel: var(--font-pixel);
+  /* Maps Tailwind's theme key onto the loader's variable. These MUST be
+     different names — `--font-sans: var(--font-sans)` is circular, collapses
+     the declaration, and leaves every element inheriting a different fallback.
+     That was the "every text has its own font" bug. */
+  --font-sans: var(--font-geist);
 }
 
 * {
@@ -63,9 +67,20 @@ html {
 body {
   background: var(--ink);
   color: #fff;
-  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Form controls do not inherit font-family from their ancestors — the UA
+   stylesheet sets its own. Without this, every input, textarea and button on
+   the site renders in the system font while the prose around it does not. */
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
 }
 
 ::selection {

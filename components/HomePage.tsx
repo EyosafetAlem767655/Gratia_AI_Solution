@@ -1,29 +1,53 @@
 "use client";
 
 import { VideoField } from "@/components/VideoField";
-import { Capabilities } from "@/components/sections/Capabilities";
-import { Contact } from "@/components/sections/Contact";
+import { About } from "@/components/sections/About";
 import { Footer } from "@/components/sections/Footer";
 import { Hero } from "@/components/sections/Hero";
+import { Industries } from "@/components/sections/Industries";
+import { Services } from "@/components/sections/Services";
 import { Work } from "@/components/sections/Work";
-import { BootProvider } from "@/components/ui/Boot";
+import { BootProvider, useBoot } from "@/components/ui/Boot";
+import { Nav } from "@/components/ui/Nav";
+import { useRevealCascade } from "@/components/ui/Reveal";
 import SplashCursor from "@/components/ui/SplashCursor";
 import { useProjects } from "@/hooks/useProjects";
+import { useEffect } from "react";
 
-export function HomePage() {
+function Body() {
   const { projects, loading } = useProjects();
+  const { reportDataReady } = useBoot();
+  useRevealCascade();
+
+  // The projects fetch is one of the three signals the progress bar tracks.
+  useEffect(() => {
+    if (!loading) reportDataReady();
+  }, [loading, reportDataReady]);
 
   return (
-    // BootProvider holds the page behind a brand screen until fonts and the
-    // film's first frames are ready, then reveals everything in one motion.
-    // Every Reveal on the page animates from that single signal rather than
-    // from its own scroll observer.
-    <BootProvider>
-      {/* The film, fixed at z-0 behind everything. */}
+    <>
       <VideoField />
 
-      {/* Fluid cursor at z-50; it mounts itself only on a fine pointer with
-          motion allowed. The hero's nav sits above it. */}
+      <Nav />
+
+      <main id="main" className="relative z-10">
+        <Hero />
+        <About />
+        <Services />
+        <Industries />
+        <Work projects={projects} loading={loading} />
+      </main>
+
+      <Footer />
+    </>
+  );
+}
+
+export function HomePage() {
+  return (
+    <BootProvider>
+      {/* Fluid cursor. Mounts itself only on a fine pointer with motion
+          allowed; deliberately untouched. */}
       <SplashCursor
         DENSITY_DISSIPATION={3.5}
         VELOCITY_DISSIPATION={2}
@@ -36,15 +60,7 @@ export function HomePage() {
         RAINBOW_MODE={false}
         COLOR="#A855F7"
       />
-
-      <main id="main" className="relative z-10">
-        <Hero projects={projects} loading={loading} />
-        <Capabilities />
-        <Work projects={projects} loading={loading} />
-        <Contact />
-      </main>
-
-      <Footer />
+      <Body />
     </BootProvider>
   );
 }

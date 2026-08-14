@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { ArrowUpRight, Check } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
+import { CONTACT } from "@/lib/content";
 
-const EMAIL = "eyosafetalem@gmail.com";
+const EMAIL = CONTACT.email;
 
 type State = { status: "idle" | "sending" | "sent"; error: string | null };
 
@@ -43,22 +44,26 @@ export function Contact() {
   return (
     <section
       id="contact"
-      className="relative flex min-h-svh items-center px-5 py-24 sm:px-8 lg:px-12"
+      className="relative px-5 pb-24 pt-4 sm:px-8 lg:px-12"
     >
-      <div className="mx-auto grid w-full max-w-5xl gap-12 lg:grid-cols-2 lg:gap-16">
+      <div className="mx-auto grid w-full max-w-5xl gap-10 lg:grid-cols-2 lg:gap-16">
         <div>
           <Reveal>
-            <h2 className="text-3xl font-semibold leading-[1.1] tracking-tight sm:text-4xl lg:text-[3.5rem]">
-              Let&rsquo;s build.
-            </h2>
-          </Reveal>
-          <Reveal delay={0.08}>
-            <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/70">
-              Tell us what your operation is struggling with. We reply to
-              everything.
+            <p className="mb-6 text-xs font-medium uppercase tracking-[0.25em] text-white/70">
+              {CONTACT.eyebrow}
             </p>
           </Reveal>
-          <Reveal delay={0.14}>
+          <Reveal>
+            <h1 className="text-3xl font-semibold leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl">
+              {CONTACT.headline}
+            </h1>
+          </Reveal>
+          <Reveal>
+            <p className="mt-5 max-w-md text-base leading-relaxed text-white/70">
+              {CONTACT.body}
+            </p>
+          </Reveal>
+          <Reveal>
             {/* Always present, and deliberately not dependent on the API route:
                 if the relay is broken this is still a working way to reach us. */}
             <a
@@ -71,8 +76,8 @@ export function Contact() {
           </Reveal>
         </div>
 
-        <Reveal delay={0.1}>
-          <form onSubmit={onSubmit} className="rounded-2xl bg-black/55 p-5 backdrop-blur-xl sm:p-6">
+        <Reveal>
+          <form onSubmit={onSubmit} className="glass rounded-2xl p-5 sm:p-6">
             {/* Honeypot: off-screen and hidden from assistive tech, so only a
                 bot will ever fill it. */}
             <input
