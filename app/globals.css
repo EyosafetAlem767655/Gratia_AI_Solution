@@ -109,6 +109,29 @@ select {
   opacity: 0.9;
 }
 
+/* Vertical rhythm for a content section.
+   One knob for the whole page. The sections had drifted into three competing
+   patterns — `py-24 lg:py-28` on three of them, `pt-2 pb-28` on another — which
+   is how the gaps got uneven as well as large. Tuning the spacing is now a
+   two-line edit here instead of a sweep through six files. */
+.section-y {
+  padding-block: 3.5rem;
+}
+
+@media (min-width: 1024px) {
+  .section-y {
+    padding-block: 4rem;
+  }
+}
+
+/* Anchor targets must clear the fixed header, which is roughly 64-72px tall.
+   Programmatic scrolling measures the header instead (see lib/scroll.ts); this
+   is the backstop for anything the browser scrolls natively — a focus jump, a
+   find-in-page hit, a restored scroll position. */
+[id] {
+  scroll-margin-top: 5rem;
+}
+
 /* Frosted panel. `backdrop-filter` is set once here rather than per component
    so the blur radius stays consistent — mismatched blurs across neighbouring
    cards is the fastest way to make glassmorphism look cheap. */

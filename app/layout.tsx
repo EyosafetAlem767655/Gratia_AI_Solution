@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { HERO } from "@/lib/content";
 import "./globals.css";
 
 // One family for the entire site. Loaded through next/font rather than a
@@ -20,17 +21,18 @@ const geist = Geist({
 });
 
 
+// Kept in step with lib/content.ts on purpose. This copy is the title in search
+// results and link previews, and it was the last place still saying "Make
+// Intelligence Come Alive" after the site was rewritten in plain language.
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   ),
-  title: "Gratia AI Solutions | Make Intelligence Come Alive",
-  description:
-    "Gratia AI Solutions creates production AI, automation, predictive systems, computer vision, and intelligent experiences for organisations in any industry.",
+  title: `Gratia AI Solutions | ${HERO.headline}`,
+  description: HERO.subline,
   openGraph: {
     title: "Gratia AI Solutions",
-    description:
-      "Living intelligence for real organisations — designed, deployed, and evolved with your business.",
+    description: HERO.subline,
     images: ["/logo.png"],
   },
 };

@@ -19,17 +19,17 @@ export function Work({
   return (
     <section
       id="work"
-      className="relative flex items-start px-5 pb-28 pt-2 sm:px-8 lg:px-12"
+      className="relative flex items-start px-5 pb-16 pt-2 sm:px-8 lg:px-12"
     >
       <div className="mx-auto w-full max-w-5xl">
         <Reveal>
-          <p className="mb-10 text-xs font-medium uppercase tracking-[0.25em] text-white/70">
+          <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-white/70">
             Proof
           </p>
         </Reveal>
 
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
@@ -46,7 +46,7 @@ export function Work({
             </p>
           </Reveal>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {projects.map((project) => (
               <Reveal key={project.id}>
                 <article className="glass h-full rounded-2xl p-5 transition-colors duration-300 hover:bg-white/[0.14]">

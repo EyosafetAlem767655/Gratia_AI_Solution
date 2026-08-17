@@ -9,9 +9,19 @@
  * downloaded once into a gitignored scratch directory; only the processed
  * output lives in the repo.
  *
- * The desktop rendition is a *lossless remux*, not a re-encode — quality is
- * preserved exactly, as requested. A smaller rendition is generated for
- * phones, which cannot display the full resolution anyway.
+ * THREE RENDITIONS, ONE PER VIEWPORT CLASS. The previous version shipped the
+ * desktop file as a lossless remux (`-c:v copy`), which meant every visitor
+ * downloaded the raw source: 18.2MB at 12,066 kb/s, roughly six times a normal
+ * web hero. Playback outran the download and the film stalled mid-loop. The
+ * quality was real and nobody could see it, because the clip sits behind a
+ * scrim, a vignette and a dimmer.
+ *
+ * FILENAMES ARE A CACHE CONTRACT. next.config.ts serves /video/* as
+ * `public, max-age=31536000, immutable`, and these names carry no content
+ * hash. A browser that has fetched `hero-1920.mp4` will not ask again for a
+ * year. So: re-encoding in place ships nothing to anyone who has already
+ * visited. Any future change to the encode MUST also change the filename —
+ * bump to `hero-1920.v2.mp4` or similar and update <VideoField>.
  *
  * Two encoder flags are doing real work and should not be dropped:
  *
@@ -82,28 +92,73 @@ async function download() {
   }
 }
 
+/**
+ * Shared encoder settings. Notes on the non-obvious ones:
+ *
+ * - `-profile:v high` rather than the source's Main. The source encoder
+ *   (h264_slapi) chose Main@L5.0, which gives up CABAC and the 8x8 transform —
+ *   precisely the tools that pay for themselves on fine foliage and haze.
+ * - `-preset slow` buys roughly 10% bitrate over `medium` for build time we
+ *   spend once and visitors never do.
+ * - `-g 48` is a keyframe every 2s at 24fps, so the loop seam is clean and the
+ *   browser can start decoding quickly from a fresh range request.
+ * - `-maxrate`/`-bufsize` cap the peak. CRF alone is unbounded on a hard
+ *   scene, and an unbounded peak is what stalls playback on a slow link.
+ */
+const BASE = (crf, maxrate) => [
+  "-c:v", "libx264",
+  "-profile:v", "high",
+  "-pix_fmt", "yuv420p",
+  "-preset", "slow",
+  "-crf", String(crf),
+  "-maxrate", maxrate,
+  "-bufsize", `${parseInt(maxrate, 10) * 2}M`,
+  "-g", "48",
+];
+
+/**
+ * CRF 24 was chosen by measurement, not taste. Sweep against the source at
+ * 1920, scored with SSIM (`ffmpeg ... ssim`):
+ *
+ *   crf 20 .......... 6.99MB   (over budget)
+ *   crf 22 .......... 5.30MB   ssim 0.9933   (over budget)
+ *   crf 24 .......... 3.96MB   ssim 0.9918   <-- chosen
+ *   crf 26 .......... 2.99MB   ssim 0.9900
+ *   crf 24 + aq3 .... 4.04MB   ssim 0.9919   (+2% size, +0.0001 ssim: not worth it)
+ *
+ * Anything at 0.99+ is indistinguishable from the source in motion. CRF 24 is
+ * the point where the file fits its budget with quality still well clear of
+ * where artefacts become findable on a paused frame — and it is a 4.6x
+ * reduction on the 18.16MB the site used to ship.
+ *
+ * If you re-tune these, re-run the sweep rather than nudging the number.
+ */
 const RENDITIONS = [
   {
-    name: "hero.mp4",
-    // `-c:v copy` — the video stream is passed through untouched, so this is
-    // the *same pixels* as the source at the same bitrate. The only change is
-    // the container: +faststart and no audio track. Quality as-is, by
-    // construction rather than by choosing a gentle CRF.
-    args: ["-c:v", "copy"],
-    maxBytes: 19_000_000,
-  },
-  {
-    name: "hero-sm.mp4",
-    // The one place a re-encode is justified. A 390px-wide phone cannot
-    // resolve 1080p detail, so dropping to 960 wide costs nothing visible on
-    // the devices that receive it, and saves those devices ~12MB of mobile
-    // data. CRF 26 is high quality — this footage is fine foliage and haze,
-    // which punishes aggressive compression.
-    args: ["-vf", "scale=960:-2", "-c:v", "libx264", "-profile:v", "high",
-           "-pix_fmt", "yuv420p", "-preset", "slow", "-crf", "26"],
+    // Desktop, 1440px viewports and up.
+    name: "hero-1920.mp4",
+    args: ["-vf", "scale=1920:-2", ...BASE(24, "5M")],
     maxBytes: 4_500_000,
   },
+  {
+    // Laptops and tablets. 1280-1439 is a very common viewport band and was
+    // previously served the full 18MB file.
+    name: "hero-1280.mp4",
+    args: ["-vf", "scale=1280:-2", ...BASE(24, "3M")],
+    maxBytes: 2_500_000,
+  },
+  {
+    // Phones. A 390px-wide screen cannot resolve 1080p detail. This tier used
+    // to be CRF 26 and came in at 21% of its budget, so it can afford to look
+    // better while everything else gets smaller.
+    name: "hero-960.mp4",
+    args: ["-vf", "scale=960:-2", ...BASE(25, "2M")],
+    maxBytes: 1_500_000,
+  },
 ];
+
+/** Set by `encode` when any rendition exceeds its budget; fails the run. */
+let overBudget = false;
 
 async function encode({ name, args, maxBytes }) {
   const dest = join(OUT, name);
@@ -122,7 +177,12 @@ async function encode({ name, args, maxBytes }) {
   ], { maxBuffer: 1 << 26 });
 
   const bytes = await sizeOf(dest);
-  const flag = bytes > maxBytes ? "  <-- OVER BUDGET" : "";
+  // A warning is not enough. The 18MB desktop file shipped for weeks under a
+  // printed `<-- OVER BUDGET` nobody was reading, so this now fails the build.
+  const flag = bytes > maxBytes
+    ? `  <-- OVER BUDGET (max ${(maxBytes / 1048576).toFixed(2)}MB)`
+    : "";
+  if (flag) overBudget = true;
   console.log(`  make  ${name} (${(bytes / 1048576).toFixed(2)}MB)${flag}`);
 }
 
@@ -153,7 +213,12 @@ await download();
 for (const rendition of RENDITIONS) await encode(rendition);
 await poster();
 
-const shipped = await Promise.all(
-  ["hero.mp4", "hero-sm.mp4", "hero-poster.jpg"].map((f) => sizeOf(join(OUT, f))),
-);
-console.log(`\nDone — ${(shipped.reduce((a, b) => a + b, 0) / 1048576).toFixed(2)}MB shipped in public/video.`);
+const SHIPPED = [...RENDITIONS.map((r) => r.name), "hero-poster.jpg"];
+const shipped = await Promise.all(SHIPPED.map((f) => sizeOf(join(OUT, f))));
+const total = shipped.reduce((a, b) => a + (b ?? 0), 0);
+console.log(`\nDone — ${(total / 1048576).toFixed(2)}MB shipped in public/video.`);
+
+if (overBudget) {
+  console.error("\nFAIL: a rendition exceeded its budget. Raise the CRF or lower the resolution.");
+  process.exit(1);
+}

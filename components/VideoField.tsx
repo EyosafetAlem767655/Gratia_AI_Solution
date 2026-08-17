@@ -18,39 +18,44 @@
  * abandons Chrome's direct video-compositing path. `translate3d` moves an
  * already-rasterised layer for free.
  *
+ * DELIVERY — why the sources are markup and not state.
+ *
+ * The previous version chose a `src` in a client effect, inside a
+ * `requestAnimationFrame`. That meant the request could not begin until React
+ * had hydrated, so the largest asset on the page was also the last one
+ * requested. Declaring `<source media>` children instead puts the URL in the
+ * server-rendered HTML, where the browser's preload scanner finds it while it
+ * is still parsing — the download starts before any JavaScript runs.
+ *
+ * The media queries do three jobs at once:
+ *   - each viewport class gets a file sized for it, so a phone is never sent
+ *     the desktop encode;
+ *   - `prefers-reduced-motion: no-preference` means a reduced-motion visitor
+ *     matches NO source, downloads nothing, and simply keeps the poster. That
+ *     replaces the old `mode === "still"` state machine entirely;
+ *   - selection happens during resource loading, so there is no flash of the
+ *     wrong file.
+ *
+ * They are ordered narrowest-first because the algorithm takes the first match.
+ *
  * VISIBILITY: the video is paused whenever the hero is off screen. There is no
- * reason to decode 1080p frames nobody can see, and it is the behaviour that
- * was asked for.
+ * reason to decode frames nobody can see.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useBoot } from "./ui/Boot";
 
-const SMALL_BREAKPOINT = 820;
+/** Must match the filenames produced by `scripts/fetch-assets.mjs`. Those names
+ *  are a cache contract — see the note in that file before renaming. */
+const SOURCES = [
+  { src: "/video/hero-960.mp4", media: "(prefers-reduced-motion: no-preference) and (max-width: 819px)" },
+  { src: "/video/hero-1280.mp4", media: "(prefers-reduced-motion: no-preference) and (max-width: 1439px)" },
+  { src: "/video/hero-1920.mp4", media: "(prefers-reduced-motion: no-preference)" },
+] as const;
 
 export function VideoField() {
   const video = useRef<HTMLVideoElement>(null);
-  const [mode, setMode] = useState<"pending" | "video" | "still">("pending");
-  const [src, setSrc] = useState<string | null>(null);
   const { reportVideoReady } = useBoot();
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        setMode("still");
-        reportVideoReady();
-        return;
-      }
-      // Decided here rather than with a <source media> query: the browser
-      // picks a <source> before layout, and getting it wrong sends 18MB to a
-      // phone.
-      setSrc(
-        window.innerWidth < SMALL_BREAKPOINT ? "/video/hero-sm.mp4" : "/video/hero.mp4",
-      );
-      setMode("video");
-    });
-    return () => cancelAnimationFrame(id);
-  }, [reportVideoReady]);
 
   // Release the loading gate on the first decoded frame. `readyState` is
   // checked first because for a cached file the event can fire before React
@@ -58,7 +63,14 @@ export function VideoField() {
   // loader until its timeout on every warm visit.
   useEffect(() => {
     const el = video.current;
-    if (mode !== "video" || !el) return;
+    if (!el) return;
+
+    // No source matched: reduced motion, or a browser that resolved nothing.
+    // Nothing is downloading, so nothing is worth waiting for.
+    if (!el.currentSrc) {
+      reportVideoReady();
+      return;
+    }
 
     if (el.readyState >= 2) {
       reportVideoReady();
@@ -73,12 +85,12 @@ export function VideoField() {
       el.removeEventListener("loadeddata", onReady);
       el.removeEventListener("error", onReady);
     };
-  }, [mode, reportVideoReady]);
+  }, [reportVideoReady]);
 
   // Pause once the hero is out of view; resume when it returns.
   useEffect(() => {
     const el = video.current;
-    if (mode !== "video" || !el) return;
+    if (!el) return;
     const hero = document.getElementById("hero");
     if (!hero) return;
 
@@ -96,13 +108,11 @@ export function VideoField() {
     );
     observer.observe(hero);
     return () => observer.disconnect();
-  }, [mode]);
+  }, []);
 
   // Scroll drives one number: how far past the hero we are. It dims the film
   // so the sections below read as text on near-solid dark.
   useEffect(() => {
-    if (mode === "pending") return;
-
     let frame = 0;
     const apply = () => {
       frame = 0;
@@ -124,29 +134,27 @@ export function VideoField() {
       window.removeEventListener("resize", onScroll);
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [mode]);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-0 overflow-hidden bg-ink" aria-hidden>
-      {mode === "video" && src ? (
-        <video
-          ref={video}
-          className="h-full w-full object-cover"
-          // The 1.04 scale is a constant, never animated — a slight overscan so
-          // no edge shows. See the performance rule above.
-          style={{ transform: "scale(1.04)", willChange: "transform" }}
-          src={src}
-          poster="/video/hero-poster.jpg"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-        />
-      ) : (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img src="/video/hero-poster.jpg" alt="" className="h-full w-full object-cover" />
-      )}
+      <video
+        ref={video}
+        className="h-full w-full object-cover"
+        // The 1.04 scale is a constant, never animated — a slight overscan so
+        // no edge shows. See the performance rule above.
+        style={{ transform: "scale(1.04)", willChange: "transform" }}
+        poster="/video/hero-poster.jpg"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+      >
+        {SOURCES.map((source) => (
+          <source key={source.src} src={source.src} media={source.media} type="video/mp4" />
+        ))}
+      </video>
 
       {/* Bottom scrim, always on.
           This clip is a black sky over a field of bright flowers, and the hero

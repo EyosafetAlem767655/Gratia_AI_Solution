@@ -5,10 +5,10 @@ import { ABOUT } from "@/lib/content";
 
 export function About() {
   return (
-    <section id="about" className="relative px-5 py-24 sm:px-8 lg:px-12 lg:py-28">
+    <section id="about" className="section-y relative px-5 sm:px-8 lg:px-12">
       <div className="mx-auto w-full max-w-3xl">
         <Reveal>
-          <p className="mb-6 text-xs font-medium uppercase tracking-[0.25em] text-white/70">
+          <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-white/70">
             {ABOUT.eyebrow}
           </p>
         </Reveal>
@@ -19,7 +19,7 @@ export function About() {
         </Reveal>
         {ABOUT.body.map((paragraph) => (
           <Reveal key={paragraph.slice(0, 24)}>
-            <p className="mt-5 text-base leading-relaxed text-white/70">{paragraph}</p>
+            <p className="mt-3 text-base leading-relaxed text-white/70">{paragraph}</p>
           </Reveal>
         ))}
       </div>

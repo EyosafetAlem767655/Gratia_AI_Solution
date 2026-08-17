@@ -4,9 +4,19 @@
  * Shared header for both routes.
  *
  * Lives here rather than inside the hero because `/contact` is a real page now
- * and needs the same chrome. In-page destinations stay hash links; Contact is
- * a `next/link`, so the address bar reads `/contact` and the URL survives a
- * refresh, a share and the back button.
+ * and needs the same chrome. Every destination is a real path — no hashes
+ * anywhere — so each URL survives a refresh, a share and the back button.
+ *
+ * FIXED, not absolute. It used to scroll away with the page, which cost more
+ * than the visual: below the fold on a phone the menu button went with it, so
+ * there was no way to open navigation at all without scrolling back to the top.
+ *
+ * NO `backdrop-filter` ON THE BAR. A full-width blur over a playing video
+ * re-blurs a large region every frame, and this project has already measured
+ * what that costs (see the performance note in components/VideoField.tsx).
+ * `bg-ink/85` reads as solid anyway, because the film is dimmed to full black
+ * below the hero. The frosted `.glass` pill inside the bar is small and static,
+ * which is a different proposition.
  */
 
 import Link from "next/link";
@@ -14,15 +24,18 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { SectionLink } from "@/components/ui/SectionLink";
+import type { SectionPath } from "@/lib/scroll";
 
-const LINKS = [
-  { label: "About", href: "/#about" },
-  { label: "What we build", href: "/#services" },
-  { label: "Industries", href: "/#industries" },
-] as const;
+const LINKS: readonly { label: string; href: SectionPath }[] = [
+  { label: "About", href: "/about" },
+  { label: "What we build", href: "/services" },
+  { label: "Industries", href: "/industries" },
+];
 
 export function Nav() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const [seenPath, setSeenPath] = useState(pathname);
 
@@ -54,9 +67,22 @@ export function Nav() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // Transparent over the hero, opaque once the page has moved. Without this the
+  // bar would sit unreadably on top of body copy.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="absolute inset-x-0 top-0 z-40">
-      <nav className="flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6 lg:px-12">
+    <header
+      className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${
+        scrolled ? "border-b border-white/10 bg-ink/85" : "border-b border-transparent"
+      }`}
+    >
+      <nav className="flex items-center justify-between px-5 py-4 sm:px-8 sm:py-5 lg:px-12">
         <Link href="/" className="text-white transition-opacity hover:opacity-80">
           <Logo />
         </Link>
@@ -64,13 +90,13 @@ export function Nav() {
         <div className="hidden items-center gap-3 md:flex">
           <div className="glass flex items-center gap-1 rounded-full px-1.5 py-1.5">
             {LINKS.map((link) => (
-              <Link
+              <SectionLink
                 key={link.label}
                 href={link.href}
                 className="rounded-full px-4 py-1.5 text-sm font-medium text-white/80 transition-colors hover:bg-white/10 hover:text-white"
               >
                 {link.label}
-              </Link>
+              </SectionLink>
             ))}
           </div>
 
@@ -116,19 +142,23 @@ export function Nav() {
       >
         <div className="flex flex-col gap-2 px-6 pt-24">
           {LINKS.map((link, i) => (
-            <Link
+            <SectionLink
               key={link.label}
               href={link.href}
-              onClick={() => setOpen(false)}
+              onNavigate={() => setOpen(false)}
               className="rounded-xl px-4 py-3.5 text-base font-medium text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-              style={{
-                opacity: open ? 1 : 0,
-                transform: open ? "translateX(0)" : "translateX(24px)",
-                transition: `opacity 400ms ease ${(i + 1) * 60}ms, transform 400ms ease ${(i + 1) * 60}ms`,
-              }}
             >
-              {link.label}
-            </Link>
+              <span
+                style={{
+                  display: "block",
+                  opacity: open ? 1 : 0,
+                  transform: open ? "translateX(0)" : "translateX(24px)",
+                  transition: `opacity 400ms ease ${(i + 1) * 60}ms, transform 400ms ease ${(i + 1) * 60}ms`,
+                }}
+              >
+                {link.label}
+              </span>
+            </SectionLink>
           ))}
         </div>
 

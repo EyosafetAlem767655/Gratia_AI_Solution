@@ -44,12 +44,12 @@ export function Contact() {
   return (
     <section
       id="contact"
-      className="relative px-5 pb-24 pt-4 sm:px-8 lg:px-12"
+      className="relative px-5 pb-16 pt-4 sm:px-8 lg:px-12"
     >
-      <div className="mx-auto grid w-full max-w-5xl gap-10 lg:grid-cols-2 lg:gap-16">
+      <div className="mx-auto grid w-full max-w-5xl gap-8 lg:grid-cols-2 lg:gap-12">
         <div>
           <Reveal>
-            <p className="mb-6 text-xs font-medium uppercase tracking-[0.25em] text-white/70">
+            <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-white/70">
               {CONTACT.eyebrow}
             </p>
           </Reveal>
@@ -59,7 +59,7 @@ export function Contact() {
             </h1>
           </Reveal>
           <Reveal>
-            <p className="mt-5 max-w-md text-base leading-relaxed text-white/70">
+            <p className="mt-4 max-w-md text-base leading-relaxed text-white/70">
               {CONTACT.body}
             </p>
           </Reveal>

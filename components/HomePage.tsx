@@ -12,17 +12,39 @@ import { Nav } from "@/components/ui/Nav";
 import { useRevealCascade } from "@/components/ui/Reveal";
 import SplashCursor from "@/components/ui/SplashCursor";
 import { useProjects } from "@/hooks/useProjects";
+import { scrollToPath, scrollToSection, type SectionId } from "@/lib/scroll";
 import { useEffect } from "react";
 
-function Body() {
+function Body({ section }: { section?: SectionId }) {
   const { projects, loading } = useProjects();
-  const { reportDataReady } = useBoot();
+  const { booted, reportDataReady } = useBoot();
   useRevealCascade();
 
   // The projects fetch is one of the three signals the progress bar tracks.
   useEffect(() => {
     if (!loading) reportDataReady();
   }, [loading, reportDataReady]);
+
+  // Deep link: /about, /services and /industries render this same document, so
+  // arriving at one means jumping to that section once the page is up.
+  //
+  // Instantly, not smoothly — animating a full page of scrolling on first paint
+  // is disorienting, and the visitor never asked to travel, they asked to
+  // arrive. The wait for `booted` matters twice over: the veil holds a scroll
+  // lock, and the sections have no final height until the reveal cascade runs.
+  useEffect(() => {
+    if (!booted || !section) return;
+    const frame = requestAnimationFrame(() => scrollToSection(section, "auto"));
+    return () => cancelAnimationFrame(frame);
+  }, [booted, section]);
+
+  // Back and forward. `pushState` from a section link does not fire popstate,
+  // so this only ever runs for real history navigation — no double scroll.
+  useEffect(() => {
+    const onPopState = () => scrollToPath(window.location.pathname);
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   return (
     <>
@@ -43,7 +65,7 @@ function Body() {
   );
 }
 
-export function HomePage() {
+export function HomePage({ section }: { section?: SectionId }) {
   return (
     <BootProvider>
       {/* Fluid cursor. Mounts itself only on a fine pointer with motion
@@ -60,7 +82,7 @@ export function HomePage() {
         RAINBOW_MODE={false}
         COLOR="#A855F7"
       />
-      <Body />
+      <Body section={section} />
     </BootProvider>
   );
 }
