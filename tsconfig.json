@@ -30,5 +30,11 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    // A separate application that happens to sit inside this folder. Its own
+    // "@/*" paths resolve against its own root, so type-checking it from here
+    // fails on every import. It is untracked and never deployed with Gratia.
+    "ws-eng-event-ticketing-assessment"
+  ]
 }

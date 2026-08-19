@@ -17,4 +17,11 @@ export default defineConfig({
   dbCredentials: {
     url: migrationUrl!,
   },
+  // Gratia owns exactly one schema, and drizzle-kit must be told so.
+  //
+  // Without this, `push` defaults to ["public"] — where another application's
+  // tables live — and push DROPS whatever it finds there that is not in our
+  // schema file. That is the mirror image of the accident that deleted our own
+  // tables, and it would take out someone else's data instead of ours.
+  schemaFilter: ["gratia"],
 });

@@ -1,12 +1,12 @@
 {
-  "id": "714483e0-15c5-4812-8ce5-d809755379be",
+  "id": "eddf7250-7e0a-43f5-a937-7cda4f363135",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.contact_submissions": {
+    "gratia.contact_submissions": {
       "name": "contact_submissions",
-      "schema": "",
+      "schema": "gratia",
       "columns": {
         "id": {
           "name": "id",
@@ -55,9 +55,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.projects": {
+    "gratia.projects": {
       "name": "projects",
-      "schema": "",
+      "schema": "gratia",
       "columns": {
         "id": {
           "name": "id",
@@ -136,9 +136,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.telegram_sessions": {
+    "gratia.telegram_sessions": {
       "name": "telegram_sessions",
-      "schema": "",
+      "schema": "gratia",
       "columns": {
         "chat_id": {
           "name": "chat_id",
@@ -177,7 +177,9 @@
     }
   },
   "enums": {},
-  "schemas": {},
+  "schemas": {
+    "gratia": "gratia"
+  },
   "sequences": {},
   "roles": {},
   "policies": {},
