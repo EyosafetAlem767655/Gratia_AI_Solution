@@ -18,19 +18,3 @@ export async function uploadBuffer(
 
   return blob.url;
 }
-
-export async function uploadFromUrl(
-  filename: string,
-  url: string,
-): Promise<string> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch asset: ${response.statusText}`);
-  }
-
-  const buffer = Buffer.from(await response.arrayBuffer());
-  const contentType =
-    response.headers.get("content-type") ?? "application/octet-stream";
-
-  return uploadBuffer(filename, buffer, contentType);
-}

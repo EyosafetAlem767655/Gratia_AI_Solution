@@ -15,6 +15,10 @@ const eslintConfig = defineConfig([
     // Installed Claude skills (their own scripts, not app code):
     ".claude/**",
     "scripts/**",
+    // A separate application that happens to live inside this folder. Linting
+    // it here reports 22 errors that belong to a different codebase and drown
+    // out Gratia's own. Also excluded in tsconfig.json and .gitignore.
+    "ws-eng-event-ticketing-assessment/**",
   ]),
 ]);
 

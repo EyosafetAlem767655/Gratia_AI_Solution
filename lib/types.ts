@@ -33,7 +33,8 @@ export interface StructuredProject {
   industry: Industry;
   testimonialHighlight: string;
   displayLayout: DisplayLayout;
-  imagePrompt: string;
+  // No imagePrompt: it existed only to feed DALL-E, and image generation is
+  // gone. See the note at the top of lib/ai/process.ts.
   sceneConfig: SceneConfig;
 }
 
