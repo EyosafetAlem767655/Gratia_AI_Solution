@@ -141,6 +141,67 @@ select {
   -webkit-backdrop-filter: blur(16px);
 }
 
+/* Same look as .glass, without the backdrop blur. For anything that MOVES.
+
+   `backdrop-filter` re-samples and re-blurs what is behind the element, so on a
+   moving element that work repeats every frame. Median frame time over three
+   scripted scrolls each:
+
+     no animation at all .................. 17.2ms
+     drift + .panel (shipped) ............. 17.9ms
+     drift + backdrop blur restored ....... 19.5ms, and much noisier
+                                            (runs of 17.0, 19.5, 26.9)
+
+   So the drift itself is free and the blur is the part that costs — modestly on
+   this machine, more on a weaker one, which is where the variance is coming
+   from.
+
+   Nothing is lost visually. These cards sit below the hero, where the dimmer in
+   VideoField is at full opacity: the backdrop is solid ink, and a blur of a
+   flat colour is that same flat colour. `rgb(255 255 255 / 0.1)` over ink
+   renders identically either way. */
+.panel {
+  background: rgb(255 255 255 / 0.1);
+}
+
+/* Testimonial drift.
+
+   A slow slide right and back again. Two constraints shaped this:
+
+   - `translate3d` only. A full-bleed video composites behind this section, and
+     animating anything that is not a compositor property re-rasterises the
+     layer every frame. The measurements are in components/VideoField.tsx.
+   - `alternate` rather than a wrapping marquee, because the brief is a float
+     that returns, and a wrap would need duplicated cards to avoid a visible
+     jump at the seam.
+
+   The amplitude is deliberately small. The cards sit in a grid with a 0.75rem
+   gutter; anything much larger and neighbours visibly overlap on the way past.
+   The parent clips the overflow so this never becomes a horizontal scrollbar. */
+
+@keyframes drift {
+  from {
+    transform: translate3d(-14px, 0, 0);
+  }
+  to {
+    transform: translate3d(14px, 0, 0);
+  }
+}
+
+.drift {
+  animation: drift 9s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* Motion that moves content sideways under the reader is exactly what this
+   setting is for. */
+@media (prefers-reduced-motion: reduce) {
+  .drift {
+    animation: none;
+    transform: none;
+  }
+}
+
 /* ============================================================================
    Boot
 

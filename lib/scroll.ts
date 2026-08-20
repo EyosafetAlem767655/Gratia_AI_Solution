@@ -17,6 +17,7 @@ export const SECTION_ROUTES = {
   "/about": "about",
   "/services": "services",
   "/industries": "industries",
+  "/testimonials": "testimonials",
 } as const;
 
 export type SectionPath = keyof typeof SECTION_ROUTES;

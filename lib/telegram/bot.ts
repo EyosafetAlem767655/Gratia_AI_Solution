@@ -1,6 +1,8 @@
 import { eq } from "drizzle-orm";
 import { processAndSaveProject } from "@/lib/ai/process";
+import sharp from "sharp";
 import { uploadBuffer } from "@/lib/blob";
+import { prepareLogo } from "@/lib/images/logo";
 import { requireDb } from "@/lib/db";
 import { telegramSessions } from "@/lib/db/schema";
 import type { TelegramPartialData } from "@/lib/types";
@@ -185,13 +187,21 @@ async function route(update: TelegramUpdate) {
         throw new Error("Missing required project data");
       }
 
-      const { buffer, contentType } = await downloadTelegramFile(
-        partial.logoFileId,
-      );
+      const { buffer } = await downloadTelegramFile(partial.logoFileId);
+      // Lift the logo off whatever background it was exported on, so it sits
+      // on the site's black canvas instead of inside a white rectangle. Always
+      // yields a PNG; falls back to a plain re-encode if keying fails, because
+      // a slightly ugly logo beats a failed submission.
+      let logoBytes: Buffer;
+      try {
+        logoBytes = (await prepareLogo(buffer)).buffer;
+      } catch {
+        logoBytes = await sharp(buffer).png().toBuffer();
+      }
       const logoUrl = await uploadBuffer(
-        `logos/${slugify(partial.companyName)}-${Date.now()}`,
-        buffer,
-        contentType,
+        `logos/${slugify(partial.companyName)}-${Date.now()}.png`,
+        logoBytes,
+        "image/png",
       );
 
       const { project } = await processAndSaveProject({
@@ -205,7 +215,7 @@ async function route(update: TelegramUpdate) {
         process.env.NEXT_PUBLIC_SITE_URL ?? "https://your-site.vercel.app";
       await sendTelegramMessage(
         chatId,
-        `Project live!\n\n${project.companyName} has been added.\nView: ${siteUrl}/#projects`,
+        `Project live!\n\n${project.companyName} has been added.\nView: ${siteUrl}/testimonials`,
       );
     } catch (error) {
       const msg =
