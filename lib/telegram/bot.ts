@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
 import { processAndSaveProject } from "@/lib/ai/process";
-import sharp from "sharp";
 import { uploadBuffer } from "@/lib/blob";
 import { prepareLogo } from "@/lib/images/logo";
 import { requireDb } from "@/lib/db";
@@ -187,21 +186,36 @@ async function route(update: TelegramUpdate) {
         throw new Error("Missing required project data");
       }
 
-      const { buffer } = await downloadTelegramFile(partial.logoFileId);
-      // Lift the logo off whatever background it was exported on, so it sits
-      // on the site's black canvas instead of inside a white rectangle. Always
-      // yields a PNG; falls back to a plain re-encode if keying fails, because
-      // a slightly ugly logo beats a failed submission.
-      let logoBytes: Buffer;
+      const { buffer, contentType } = await downloadTelegramFile(
+        partial.logoFileId,
+      );
+
+      // Lift the logo off whatever background it was exported on, so it sits on
+      // the site's black canvas instead of inside a white rectangle.
+      //
+      // Entirely optional. If the image pipeline is unavailable the original
+      // file is uploaded untouched: the logo looks worse, and the submission
+      // still succeeds. This used to fall back to a sharp re-encode, which was
+      // no fallback at all — sharp being broken is the very case it had to
+      // survive.
+      let logoBytes = buffer;
+      let logoType = contentType || "image/png";
+      let logoExt = logoType.includes("jpeg") || logoType.includes("jpg") ? "jpg"
+        : logoType.includes("webp") ? "webp"
+        : "png";
       try {
-        logoBytes = (await prepareLogo(buffer)).buffer;
-      } catch {
-        logoBytes = await sharp(buffer).png().toBuffer();
+        const prepared = await prepareLogo(buffer);
+        logoBytes = prepared.buffer;
+        logoType = prepared.contentType;
+        logoExt = "png";
+      } catch (error) {
+        console.error("Logo preparation unavailable; uploading original.", error);
       }
+
       const logoUrl = await uploadBuffer(
-        `logos/${slugify(partial.companyName)}-${Date.now()}.png`,
+        `logos/${slugify(partial.companyName)}-${Date.now()}.${logoExt}`,
         logoBytes,
-        "image/png",
+        logoType,
       );
 
       const { project } = await processAndSaveProject({

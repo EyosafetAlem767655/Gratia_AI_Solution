@@ -1,4 +1,18 @@
-import sharp from "sharp";
+/**
+ * sharp is loaded on demand, never at module scope.
+ *
+ * It is a native module. When its platform binary is missing — which is exactly
+ * what happened on Vercel, where `@img/sharp-libvips-linux-x64` was left out of
+ * the traced bundle and `libvips-cpp.so` could not be dlopen'd — a top-level
+ * import throws while the module is being evaluated. That took down the whole
+ * Telegram webhook with a 500 on every update, because the route imports this
+ * file transitively. A logo-tidying nicety must never be able to do that, so
+ * the import happens inside the function and callers are expected to catch.
+ */
+async function loadSharp() {
+  return (await import("sharp")).default;
+}
+
 
 /**
  * Lifts a client logo off whatever background it arrived on, so it can sit
@@ -99,6 +113,7 @@ function sampleBorder(data: Buffer, width: number, height: number, channels: num
 }
 
 export async function prepareLogo(input: Buffer): Promise<PreparedLogo> {
+  const sharp = await loadSharp();
   const base = sharp(input, { failOn: "none" }).rotate();
   const meta = await base.metadata();
 
