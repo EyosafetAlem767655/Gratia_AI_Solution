@@ -31,6 +31,7 @@ const LINKS: readonly { label: string; href: SectionPath }[] = [
   { label: "About", href: "/about" },
   { label: "What we build", href: "/services" },
   { label: "Industries", href: "/industries" },
+  { label: "Testimonials", href: "/testimonials" },
 ];
 
 export function Nav() {
@@ -87,7 +88,7 @@ export function Nav() {
           <Logo />
         </Link>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           <div className="glass flex items-center gap-1 rounded-full px-1.5 py-1.5">
             {LINKS.map((link) => (
               <SectionLink
@@ -113,7 +114,7 @@ export function Nav() {
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
-          className="glass relative z-50 flex h-10 w-10 items-center justify-center rounded-full text-white md:hidden"
+          className="glass relative z-50 flex h-10 w-10 items-center justify-center rounded-full text-white lg:hidden"
         >
           <Menu
             className={`absolute h-5 w-5 transition-all duration-300 ${
@@ -130,13 +131,13 @@ export function Nav() {
 
       <div
         onClick={() => setOpen(false)}
-        className={`fixed inset-0 z-40 bg-black/80 backdrop-blur-md transition-opacity duration-300 md:hidden ${
+        className={`fixed inset-0 z-40 bg-black/80 backdrop-blur-md transition-opacity duration-300 lg:hidden ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
         aria-hidden
       />
       <div
-        className={`fixed right-0 top-0 z-40 flex h-full w-72 flex-col bg-black/90 backdrop-blur-xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden ${
+        className={`fixed right-0 top-0 z-40 flex h-full w-72 flex-col bg-black/90 backdrop-blur-xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >

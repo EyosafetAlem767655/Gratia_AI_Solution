@@ -43,9 +43,42 @@ async function loadSharp() {
  * design choice. Anything with its own colour — the common case — is untouched.
  */
 
-/** Longest edge of the stored logo. Cards render it far smaller; this leaves
- *  room for retina without shipping a 1280px asset. */
-const MAX_EDGE = 400;
+/**
+ * Every prepared logo is emitted on this exact canvas, transparent, centred.
+ *
+ * A fixed canvas is what lets the card render `h-20 w-auto` and have every mark
+ * come out the same size. The dimensions are derived, not guessed: at
+ * TARGET_INK the widest real logo (aspect 5.28) needs 345px and the tallest
+ * (aspect 0.63) needs 189px, so 360x200 is the smallest canvas that holds both
+ * extremes. Any wider and every logo renders smaller for no reason, because the
+ * card scales the whole canvas, padding included.
+ */
+const CANVAS_W = 360;
+const CANVAS_H = 200;
+
+/**
+ * Target optical area for the ink, as sqrt(width x height).
+ *
+ * THIS IS THE FIX FOR "some logos are small and unreadable". Constraining a
+ * logo by height alone assumes every mark has a similar aspect ratio. The four
+ * real logos in the database span 0.63 to 5.28 — a portrait estate agent's mark
+ * and a long thin wordmark — so a shared 48px height rendered one at 30x48 and
+ * the other at 253x48. Same height, wildly different presence.
+ *
+ * Normalising sqrt(area) instead means a tall mark gets to be tall and a wide
+ * one wide, while both cover roughly the same number of pixels, which is what
+ * the eye actually reads as "the same size".
+ */
+const TARGET_INK = 150;
+
+/**
+ * How far a small logo may be enlarged to reach TARGET_INK.
+ *
+ * Upscaling is a trade: at 1.6x a 227px wordmark is a little soft but legible,
+ * and legible-and-soft beats crisp-and-30px-wide. Past that it turns to mush,
+ * so the logo is simply allowed to be smaller than target.
+ */
+const MAX_UPSCALE = 1.6;
 
 /** Squared RGB distance under which a pixel is definitely background. */
 const INNER = 26 * 26 * 3;
@@ -193,12 +226,33 @@ export async function prepareLogo(input: Buffer): Promise<PreparedLogo> {
       .toBuffer();
   }
 
+  // Normalise to a constant optical area, then centre on the shared canvas.
+  const trimmed = await sharp(out).metadata();
+  const tw = trimmed.width ?? CANVAS_W;
+  const th = trimmed.height ?? CANVAS_H;
+
+  // Scale that would put the ink at the target area, capped for upscaling and
+  // clamped so it can never overflow the canvas on either axis.
+  const areaScale = TARGET_INK / Math.sqrt(tw * th);
+  const scale = Math.min(
+    Math.min(areaScale, MAX_UPSCALE),
+    CANVAS_W / tw,
+    CANVAS_H / th,
+  );
+
+  const inkW = Math.max(1, Math.round(tw * scale));
+  const inkH = Math.max(1, Math.round(th * scale));
+
   out = await sharp(out)
-    .resize({
-      width: MAX_EDGE,
-      height: MAX_EDGE,
-      fit: "inside",
-      withoutEnlargement: true,
+    .resize(inkW, inkH, { fit: "fill" })
+    .extend({
+      // Centre it. Odd remainders go to the right/bottom, which is invisible at
+      // this size and avoids an off-by-one that would fail the extend.
+      top: Math.floor((CANVAS_H - inkH) / 2),
+      bottom: Math.ceil((CANVAS_H - inkH) / 2),
+      left: Math.floor((CANVAS_W - inkW) / 2),
+      right: Math.ceil((CANVAS_W - inkW) / 2),
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
     })
     .png({ compressionLevel: 9 })
     .toBuffer();
@@ -206,6 +260,8 @@ export async function prepareLogo(input: Buffer): Promise<PreparedLogo> {
   return {
     buffer: out,
     contentType: "image/png",
-    note: `${meta.format ?? "image"} ${meta.width}x${meta.height} -> png, ${note}`,
+    note:
+      `${meta.format ?? "image"} ${meta.width}x${meta.height} -> png ${CANVAS_W}x${CANVAS_H}, ` +
+      `${note}, ink ${tw}x${th} -> ${inkW}x${inkH} (${scale.toFixed(2)}x)`,
   };
 }

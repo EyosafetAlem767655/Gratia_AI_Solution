@@ -12,9 +12,9 @@
  */
 
 export const HERO = {
-  headline: "AI systems that solve real business problems",
+  headline: "AI products to solve any problems.",
   subline:
-    "We design and build AI software for companies that want to work faster and spend less.",
+    "We design and build AI solutions for companies that want to grow to the next level.",
   cta: "Talk to us",
 } as const;
 

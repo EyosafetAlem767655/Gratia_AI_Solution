@@ -164,41 +164,59 @@ select {
   background: rgb(255 255 255 / 0.1);
 }
 
-/* Testimonial drift.
+/* The testimonial train.
 
-   A slow slide right and back again. Two constraints shaped this:
+   A continuous marquee: cards travel left to right, leave on the right and
+   return from the left, endlessly. This replaces a +/-14px `alternate` drift,
+   which was the wrong shape for the brief — at that amplitude the cards read as
+   nudging into their neighbours rather than travelling anywhere.
 
-   - `translate3d` only. A full-bleed video composites behind this section, and
-     animating anything that is not a compositor property re-rasterises the
-     layer every frame. The measurements are in components/VideoField.tsx.
-   - `alternate` rather than a wrapping marquee, because the brief is a float
-     that returns, and a wrap would need duplicated cards to avoid a visible
-     jump at the seam.
+   HOW THE SEAM IS HIDDEN. `Work.tsx` renders the card set twice inside the
+   track and the animation moves it from -50% to 0. At -50% the second copy sits
+   exactly where the first copy sits at 0, so the loop point is invisible and
+   there is no jump to disguise. The duplicate is `aria-hidden`, or every
+   testimonial would be announced twice.
 
-   The amplitude is deliberately small. The cards sit in a grid with a 0.75rem
-   gutter; anything much larger and neighbours visibly overlap on the way past.
-   The parent clips the overflow so this never becomes a horizontal scrollbar. */
+   `linear`, deliberately. Any easing decelerates into the loop point and the
+   seam becomes visible as a hitch, which is the one thing a marquee cannot do.
 
-@keyframes drift {
+   Duration comes from `--train-duration`, set inline from the card count, so
+   adding testimonials lengthens the loop instead of speeding the train up.
+
+   `.panel` not `.glass` on the cards: this element is in constant motion, and
+   the measured cost of `backdrop-filter` under motion is recorded above. */
+
+@keyframes train {
   from {
-    transform: translate3d(-14px, 0, 0);
+    transform: translate3d(-50%, 0, 0);
   }
   to {
-    transform: translate3d(14px, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
-.drift {
-  animation: drift 9s ease-in-out infinite alternate;
+.train {
+  animation: train var(--train-duration, 40s) linear infinite;
   will-change: transform;
 }
 
-/* Motion that moves content sideways under the reader is exactly what this
-   setting is for. */
+/* Stop for anyone trying to read: on hover, and while the detail dialog is
+   open (the dialog sets data-paused, since :hover is no help to a keyboard). */
+.train-viewport:hover .train,
+.train[data-paused="true"] {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .drift {
+  .train {
     animation: none;
     transform: none;
+  }
+
+  /* With the motion gone the cards would be unreachable past the viewport
+     edge, so hand the row back to the user as a scrollable strip. */
+  .train-viewport {
+    overflow-x: auto;
   }
 }
 

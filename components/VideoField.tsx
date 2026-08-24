@@ -156,12 +156,24 @@ export function VideoField() {
         ))}
       </video>
 
-      {/* Bottom scrim, always on.
-          This clip is a black sky over a field of bright flowers, and the hero
-          copy sits low — directly on the brightest part of the frame. Without
-          this the text is unreadable. It fades to nothing by mid-frame so the
-          robot and the sky stay clean. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%] [background:linear-gradient(to_top,rgba(1,1,1,0.94)_0%,rgba(1,1,1,0.72)_28%,rgba(1,1,1,0.28)_62%,transparent_100%)]" />
+      {/* Bottom scrim, always on — but much lighter than it used to be.
+          It was 70% tall and reached 0.94 black at the base, because the hero
+          copy sat directly on the flower field and nothing less would carry it.
+          The copy now flanks the frame at `lg`, so this only has to keep the
+          brightest part of the field from fighting the chevron and the mobile
+          stack. Shorter and weaker means the flowers are actually visible,
+          which was the point of choosing this clip. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] [background:linear-gradient(to_top,rgba(1,1,1,0.88)_0%,rgba(1,1,1,0.6)_30%,rgba(1,1,1,0.2)_65%,transparent_100%)] lg:h-[46%] lg:[background:linear-gradient(to_top,rgba(1,1,1,0.72)_0%,rgba(1,1,1,0.42)_35%,transparent_100%)]" />
+
+      {/* Side scrims for the two hero flanks, lg and up only.
+          The headline sits left and the supporting copy right, over film rather
+          than over the old heavy bottom scrim. These darken just those two
+          columns and fade out well before the centre, so the robot — which
+          occupies only x 47-55% — is never touched. Below lg the copy is a
+          single bottom-anchored stack and these would darken the frame for
+          nothing, so they do not render there. */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-[42%] lg:block [background:linear-gradient(to_right,rgba(1,1,1,0.8)_0%,rgba(1,1,1,0.45)_45%,transparent_100%)]" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[42%] lg:block [background:linear-gradient(to_left,rgba(1,1,1,0.8)_0%,rgba(1,1,1,0.45)_45%,transparent_100%)]" />
 
       {/* Edge vignette — keeps the corners from competing with the nav. */}
       <div className="pointer-events-none absolute inset-0 [background:radial-gradient(125%_95%_at_50%_38%,transparent_45%,rgba(1,1,1,0.5)_100%)]" />
