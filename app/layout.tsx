@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { HERO } from "@/lib/content";
 import "./globals.css";
 
@@ -54,6 +55,12 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-ink text-white antialiased">
         {children}
+
+        {/* Vercel Web Analytics: page views and visitors, no cookies and no
+            cross-site identifier. The /next entry is the App Router build —
+            it renders nothing itself and injects the script, and it is inert
+            outside a Vercel deployment, so local runs report nothing. */}
+        <Analytics />
       </body>
     </html>
   );
