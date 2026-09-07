@@ -16,14 +16,35 @@ import { scrollToPath, scrollToSection, type SectionId } from "@/lib/scroll";
 import { useEffect } from "react";
 
 function Body({ section }: { section?: SectionId }) {
-  const { projects, loading } = useProjects();
-  const { booted, reportDataReady } = useBoot();
+  const { booted, failed, reportDataReady, reportProgress, fail } = useBoot();
+  const { projects, loading, error } = useProjects(failed);
   useRevealCascade();
 
   // The projects fetch is one of the three signals the progress bar tracks.
   useEffect(() => {
-    if (!loading) reportDataReady();
-  }, [loading, reportDataReady]);
+    if (error) fail(error);
+    else if (!loading) reportDataReady();
+  }, [loading, error, reportDataReady, fail]);
+
+  useEffect(() => {
+    if (loading || error || failed) return;
+    let active = true;
+    const urls = [...new Set([
+      "/video/hero-poster.v2.jpg",
+      "https://websitelaunches.com/badge/gratiaaisolutions.com.svg",
+      ...projects.map(project => project.companyLogoUrl).filter(Boolean),
+    ])];
+    let decoded = 0;
+    const images = urls.map(src => {
+      const image = new Image();
+      image.src = src;
+      void image.decode().then(() => {
+        if (active) reportProgress("images", ++decoded / urls.length);
+      }).catch(() => { if (active) fail("A page image could not load. Please retry."); });
+      return image;
+    });
+    return () => { active = false; images.forEach(image => { image.src = ""; }); };
+  }, [loading, error, failed, projects, reportProgress, fail]);
 
   // Deep link: /about, /services and /industries render this same document, so
   // arriving at one means jumping to that section once the page is up.

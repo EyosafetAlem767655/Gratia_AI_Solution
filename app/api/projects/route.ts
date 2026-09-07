@@ -30,6 +30,6 @@ export async function GET() {
       })),
     );
   } catch {
-    return NextResponse.json([]);
+    return NextResponse.json({ error: "Projects could not load" }, { status: 503 });
   }
 }

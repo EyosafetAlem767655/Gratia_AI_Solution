@@ -98,7 +98,7 @@ export function Work({
                         <img
                           src={project.companyLogoUrl}
                           alt={`${project.companyName} logo`}
-                          loading="lazy"
+                          loading="eager"
                           decoding="async"
                           // The canvas is a fixed size for every logo, so a
                           // single height is all that is needed and they all

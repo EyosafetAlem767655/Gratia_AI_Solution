@@ -1,114 +1,104 @@
 "use client";
 
-/**
- * The hero film.
- *
- * PERFORMANCE RULE — read before adding effects here.
- *
- * Only `opacity` and `translate3d` may ever be animated on this element. Both
- * were arrived at by measuring a scripted full-page scroll, not by intuition:
- *
- *   animated `filter` ................ worst; not a compositor property, so
- *                                      every frame re-rendered the surface
- *   animated `scale` ................. 66ms median, 88/90 frames dropped
- *   static scale + animated translate . 17ms median,  3/90 dropped
- *
- * `scale` is the subtle one. It *is* a transform, but changing it changes the
- * layer's rasterisation scale, which forces a re-raster every frame and
- * abandons Chrome's direct video-compositing path. `translate3d` moves an
- * already-rasterised layer for free.
- *
- * DELIVERY — why the sources are markup and not state.
- *
- * The previous version chose a `src` in a client effect, inside a
- * `requestAnimationFrame`. That meant the request could not begin until React
- * had hydrated, so the largest asset on the page was also the last one
- * requested. Declaring `<source media>` children instead puts the URL in the
- * server-rendered HTML, where the browser's preload scanner finds it while it
- * is still parsing — the download starts before any JavaScript runs.
- *
- * The media queries do three jobs at once:
- *   - each viewport class gets a file sized for it, so a phone is never sent
- *     the desktop encode;
- *   - `prefers-reduced-motion: no-preference` means a reduced-motion visitor
- *     matches NO source, downloads nothing, and simply keeps the poster. That
- *     replaces the old `mode === "still"` state machine entirely;
- *   - selection happens during resource loading, so there is no flash of the
- *     wrong file.
- *
- * They are ordered narrowest-first because the algorithm takes the first match.
- *
- * VISIBILITY: the video is paused whenever the hero is off screen. There is no
- * reason to decode frames nobody can see.
- */
-
 import { useEffect, useRef } from "react";
 import { useBoot } from "./ui/Boot";
 
-/** Must match the filenames produced by `scripts/fetch-assets.mjs`. Those names
- *  are a cache contract — see the note in that file before renaming. */
-const SOURCES = [
-  { src: "/video/hero-960.mp4", media: "(prefers-reduced-motion: no-preference) and (max-width: 819px)" },
-  { src: "/video/hero-1280.mp4", media: "(prefers-reduced-motion: no-preference) and (max-width: 1439px)" },
-  { src: "/video/hero-1920.mp4", media: "(prefers-reduced-motion: no-preference)" },
-] as const;
+/** Account for the full object-cover surface, including portrait height and DPR.
+ * Never upscale the source or change renditions mid-playback. */
+export function selectHeroWidth(width: number, height: number, dpr: number) {
+  const required = Math.min(1920, Math.max(width, height * 1928 / 1072) * Math.max(1, dpr) * 1.04);
+  return [960, 1280, 1920].find(size => size >= required) ?? 1920;
+}
 
 export function VideoField() {
   const video = useRef<HTMLVideoElement>(null);
-  const { reportVideoReady } = useBoot();
+  const { prepared, booted, failed, reportProgress, reportVideoReady, fail, setStartAnimation } = useBoot();
 
-  // Release the loading gate on the first decoded frame. `readyState` is
-  // checked first because for a cached file the event can fire before React
-  // attaches the listener, and would then never fire again — holding the
-  // loader until its timeout on every warm visit.
   useEffect(() => {
     const el = video.current;
-    if (!el) return;
-
-    // No source matched: reduced motion, or a browser that resolved nothing.
-    // Nothing is downloading, so nothing is worth waiting for.
-    if (!el.currentSrc) {
+    if (!el || failed) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
       reportVideoReady();
       return;
     }
-
-    if (el.readyState >= 2) {
-      reportVideoReady();
-      return;
+    const controller = new AbortController();
+    let objectUrl: string | undefined;
+    const onError = () => fail("The animation could not load. Please retry.");
+    const onReady = () => reportProgress("video", 0.99);
+    el.addEventListener("loadeddata", onReady);
+    el.addEventListener("error", onError);
+    async function load() {
+      const size = selectHeroWidth(innerWidth, innerHeight, devicePixelRatio);
+      const response = await fetch(`/video/hero-${size}.v2.mp4`, { signal: controller.signal });
+      if (!response.ok || !response.body) throw new Error("Video download failed");
+      const length = Number(response.headers.get("content-length"));
+      const reader = response.body.getReader();
+      const chunks: ArrayBuffer[] = [];
+      let received = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value.slice().buffer);
+        received += value.byteLength;
+        reportProgress("video", length > 0 ? Math.min(0.95, received / length * 0.95) : 0);
+      }
+      if (controller.signal.aborted) return;
+      objectUrl = URL.createObjectURL(new Blob(chunks, { type: "video/mp4" }));
+      el!.src = objectUrl;
+      el!.load();
     }
-    const onReady = () => reportVideoReady();
-    el.addEventListener("loadeddata", onReady, { once: true });
-    // If the network dies entirely, still release rather than stranding the
-    // visitor on the loading screen.
-    el.addEventListener("error", onReady, { once: true });
+    void load().catch(() => { if (!controller.signal.aborted) onError(); });
     return () => {
+      controller.abort();
       el.removeEventListener("loadeddata", onReady);
-      el.removeEventListener("error", onReady);
+      el.removeEventListener("error", onError);
+      el.pause();
+      el.removeAttribute("src");
+      el.load();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [reportVideoReady]);
+  }, [failed, reportProgress, reportVideoReady, fail]);
 
-  // Pause once the hero is out of view; resume when it returns.
+  // Only start once the entire page is prepared; play() confirms playback
+  // before the veil lifts. A user gesture can unlock restrictive browsers.
   useEffect(() => {
     const el = video.current;
-    if (!el) return;
-    const hero = document.getElementById("hero");
-    if (!hero) return;
+    if (!el || !prepared || failed || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let active = true;
+    let startTimer: ReturnType<typeof setTimeout> | undefined;
+    const start = () => {
+      clearTimeout(startTimer);
+      startTimer = setTimeout(() => { if (active) fail("The animation could not start. Please retry."); }, 30_000);
+      void el.play().then(() => {
+        clearTimeout(startTimer);
+        if (!active) return;
+        setStartAnimation(null);
+        reportVideoReady();
+      }).catch((error: DOMException) => {
+        clearTimeout(startTimer);
+        if (!active) return;
+        if (error.name === "NotAllowedError") setStartAnimation(start);
+        else fail("The animation could not start. Please retry.");
+      });
+    };
+    start();
+    return () => { active = false; clearTimeout(startTimer); setStartAnimation(null); };
+  }, [prepared, failed, reportVideoReady, setStartAnimation, fail]);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          // play() rejects if the element is detached or autoplay is blocked;
-          // neither is worth surfacing.
-          void el.play().catch(() => {});
-        } else {
-          el.pause();
-        }
-      },
-      { threshold: 0.05 },
-    );
+  useEffect(() => {
+    const el = video.current;
+    const hero = document.getElementById("hero");
+    if (!el || !hero || !booted || !el.currentSrc) return;
+    let visible = true;
+    const update = () => {
+      if (visible && !document.hidden) void el.play().catch(() => {});
+      else el.pause();
+    };
+    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; update(); }, { threshold: 0.05 });
     observer.observe(hero);
-    return () => observer.disconnect();
-  }, []);
+    document.addEventListener("visibilitychange", update);
+    return () => { observer.disconnect(); document.removeEventListener("visibilitychange", update); };
+  }, [booted]);
 
   // Scroll drives one number: how far past the hero we are. It dims the film
   // so the sections below read as text on near-solid dark.
@@ -142,18 +132,14 @@ export function VideoField() {
         ref={video}
         className="h-full w-full object-cover"
         // The 1.04 scale is a constant, never animated — a slight overscan so
-        // no edge shows. See the performance rule above.
+        // no edge shows. Keep effects to opacity and translation to avoid rerasterization.
         style={{ transform: "scale(1.04)", willChange: "transform" }}
-        poster="/video/hero-poster.jpg"
-        autoPlay
+        poster="/video/hero-poster.v2.jpg"
         loop
         muted
         playsInline
         preload="auto"
       >
-        {SOURCES.map((source) => (
-          <source key={source.src} src={source.src} media={source.media} type="video/mp4" />
-        ))}
       </video>
 
       {/* Bottom scrim, always on — but much lighter than it used to be.

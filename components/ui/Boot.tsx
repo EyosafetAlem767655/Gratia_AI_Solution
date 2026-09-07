@@ -1,164 +1,107 @@
 "use client";
 
-/**
- * Holds the page behind a loading screen until it is genuinely ready, then
- * releases it and cascades the content in from the top.
- *
- * The progress bar reports real work, not a decorative timer: three weighted
- * signals — webfonts, the hero video's first decoded frame, and the projects
- * fetch — each move the bar when they actually land. A fake progress animation
- * that finishes before the page does is worse than no bar at all, because it
- * teaches people the bar means nothing.
- *
- * Two deliberate choices:
- *
- * - We wait for the video's `loadeddata` (first frame decoded), NOT
- *   `canplaythrough` (enough buffered to play to the end). The hero file is
- *   18MB; waiting for a full buffer would hold the page for many seconds on an
- *   ordinary connection, which is the opposite of the point.
- * - There is a hard ceiling. A loading gate without one is a permanently blank
- *   page the first time an asset stalls, so the page always appears — ready or
- *   not.
- */
-
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { LogoMark } from "@/components/ui/Logo";
 
-const CEILING_MS = 6000;
-
-/** Relative weight of each signal. Video dominates because it is by far the
- *  largest thing being waited on, so the bar tracks felt progress. */
-const WEIGHTS = { fonts: 0.2, video: 0.6, data: 0.2 } as const;
+const WEIGHTS = { fonts: 0.1, video: 0.7, data: 0.1, images: 0.1 };
 type Signal = keyof typeof WEIGHTS;
-
-const ALL: Signal[] = ["fonts", "video", "data"];
-
+const ALL: Signal[] = ["fonts", "video", "data", "images"];
 type BootValue = {
   booted: boolean;
+  prepared: boolean;
+  failed: boolean;
+  reportProgress: (signal: Signal, progress: number) => void;
   reportVideoReady: () => void;
   reportDataReady: () => void;
+  fail: (message: string) => void;
+  setStartAnimation: (action: (() => void) | null) => void;
 };
-
 const BootContext = createContext<BootValue>({
-  booted: true,
-  reportVideoReady: () => {},
-  reportDataReady: () => {},
+  booted: true, prepared: true, failed: false, reportProgress: () => {},
+  reportVideoReady: () => {}, reportDataReady: () => {}, fail: () => {}, setStartAnimation: () => {},
 });
+export const useBoot = () => useContext(BootContext);
 
-export function useBoot() {
-  return useContext(BootContext);
+export function BootProvider({ children, expects = ALL }: { children: React.ReactNode; expects?: Signal[] }) {
+  const [attempt, setAttempt] = useState(0);
+  return <BootSession key={attempt} expects={expects} retry={() => setAttempt(n => n + 1)}>{children}</BootSession>;
 }
 
-export function BootProvider({
-  children,
-  expects = ALL,
-}: {
-  children: React.ReactNode;
-  /**
-   * Which signals this route actually produces. `/contact` has no hero video
-   * and fetches no projects, so waiting on those would stall its loader until
-   * the ceiling fired — a six-second blank screen on a page with nothing to
-   * load. Routes declare what they will report; the weights renormalise.
-   */
-  expects?: Signal[];
-}) {
+function BootSession({ children, expects, retry }: { children: React.ReactNode; expects: Signal[]; retry: () => void }) {
   const [booted, setBooted] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const done = useRef<Record<Signal, boolean>>({ fonts: false, video: false, data: false });
-  const released = useRef(false);
-
-  const release = useCallback(() => {
-    if (released.current) return;
-    released.current = true;
-    setProgress(1);
-    // Let the bar visibly reach 100% before the veil lifts. Snapping away at
-    // 90% is the detail that makes a loader feel broken.
-    window.setTimeout(() => setBooted(true), 260);
-  }, []);
-
-  // Renormalised so a route awaiting a subset still reaches a true 100%.
-  const totalWeight = expects.reduce((sum, key) => sum + WEIGHTS[key], 0) || 1;
+  const [values, setValues] = useState({ fonts: 0, video: 0, data: 0, images: 0 });
+  const [error, setError] = useState<string | null>(null);
+  const [startAnimation, setAction] = useState<(() => void) | null>(null);
+  const latest = useRef(values);
   const expectedKey = expects.join(",");
-
-  const complete = useCallback(
-    (signal: Signal) => {
-      const watching = expectedKey.split(",") as Signal[];
-      if (!watching.includes(signal) || done.current[signal]) return;
-      done.current[signal] = true;
-      const earned = watching.reduce(
-        (sum, key) => sum + (done.current[key] ? WEIGHTS[key] : 0),
-        0,
-      );
-      const ratio = earned / totalWeight;
-      setProgress(ratio);
-      if (ratio >= 0.999) release();
-    },
-    [release, totalWeight, expectedKey],
-  );
-
-  const reportVideoReady = useCallback(() => complete("video"), [complete]);
-  const reportDataReady = useCallback(() => complete("data"), [complete]);
+  const activity = useRef<Partial<Record<Signal, number>>>({});
+  const reportProgress = useCallback((signal: Signal, progress: number) => {
+    activity.current[signal] = Date.now();
+    latest.current = { ...latest.current, [signal]: Math.max(latest.current[signal], Math.min(1, progress)) };
+    setValues(latest.current);
+  }, []);
+  const fail = useCallback((message: string) => setError(previous => previous ?? message), []);
+  const setStartAnimation = useCallback((action: (() => void) | null) => setAction(() => action), []);
+  const reportVideoReady = useCallback(() => reportProgress("video", 1), [reportProgress]);
+  const reportDataReady = useCallback(() => reportProgress("data", 1), [reportProgress]);
+  const prepared = expects.every(key => values[key] >= (key === "video" ? 0.99 : 1));
+  const complete = expects.every(key => values[key] === 1);
+  const total = expects.reduce((sum, key) => sum + WEIGHTS[key], 0) || 1;
+  const progress = expects.reduce((sum, key) => sum + values[key] * WEIGHTS[key], 0) / total;
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      document.documentElement.classList.add("no-motion");
-      const immediate = window.setTimeout(release, 0);
-      return () => window.clearTimeout(immediate);
-    }
+    let active = true;
+    document.documentElement.classList.toggle("no-motion", matchMedia("(prefers-reduced-motion: reduce)").matches);
+    document.fonts.ready.then(() => {
+      if (!active) return;
+      if ([...document.fonts].some(font => font.status === "error")) fail("Fonts could not load. Please retry.");
+      else reportProgress("fonts", 1);
+    }).catch(() => { if (active) fail("Fonts could not load. Please retry."); });
+    return () => { active = false; };
+  }, [reportProgress, fail]);
 
-    const ceiling = window.setTimeout(release, CEILING_MS);
-    document.fonts.ready.then(() => complete("fonts"));
-    return () => window.clearTimeout(ceiling);
-  }, [release, complete]);
+  useEffect(() => {
+    if (booted || error) return;
+    const started = Date.now();
+    const timer = window.setInterval(() => {
+      const stalled = (expectedKey.split(",") as Signal[]).find(key => {
+        if (latest.current[key] === 1) return false;
+        // Images depend on data; decoded video waits for the other assets.
+        if (key === "images" && latest.current.data < 1) return false;
+        if (key === "video" && latest.current.video >= 0.99) return false;
+        return Date.now() - (activity.current[key] ?? (key === "images" ? activity.current.data : undefined) ?? started) >= 30_000;
+      });
+      if (stalled) fail("Loading stopped responding. Check your connection and retry.");
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [booted, error, expectedKey, fail]);
 
-  // Hold the scroll position while the veil is up, so nobody scrolls blind
-  // through content they cannot see.
+  useEffect(() => {
+    if (!complete || error) return;
+    const timer = window.setTimeout(() => setBooted(true), 260);
+    return () => clearTimeout(timer);
+  }, [complete, error]);
+
   useEffect(() => {
     if (booted) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
+    return () => { document.body.style.overflow = previous; };
   }, [booted]);
 
-  const value = useMemo(
-    () => ({ booted, reportVideoReady, reportDataReady }),
-    [booted, reportVideoReady, reportDataReady],
-  );
-
-  return (
-    <BootContext.Provider value={value}>
-      {children}
-      <div data-boot-veil data-done={booted} aria-hidden={booted}>
-        <div className="flex w-56 flex-col items-center gap-6">
-          <LogoMark className="h-10 w-10 text-white" />
-          <div
-            className="h-px w-full overflow-hidden bg-white/15"
-            role="progressbar"
-            aria-label="Loading"
-            aria-valuenow={Math.round(progress * 100)}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          >
-            <div
-              className="h-full origin-left bg-white transition-transform duration-500 ease-out"
-              style={{ transform: `scaleX(${progress})` }}
-            />
-          </div>
-          <span className="text-[0.65rem] tabular-nums tracking-[0.3em] text-white/70">
-            {String(Math.round(progress * 100)).padStart(3, "0")}
-          </span>
+  const value = useMemo(() => ({ booted, prepared, failed: !!error, reportProgress, reportVideoReady, reportDataReady, fail, setStartAnimation }),
+    [booted, prepared, error, reportProgress, reportVideoReady, reportDataReady, fail, setStartAnimation]);
+  return <BootContext.Provider value={value}>
+    <div inert={!booted} data-page-ready={booted}>{children}</div>
+    <div data-boot-veil data-done={booted} aria-hidden={booted} inert={booted}>
+      <div className="flex w-64 flex-col items-center gap-6 text-center">
+        <LogoMark className="h-10 w-10 text-white" />
+        <div className="h-px w-full overflow-hidden bg-white/15" role="progressbar" aria-label="Loading" aria-valuenow={Math.floor(progress * 100)} aria-valuemin={0} aria-valuemax={100}>
+          <div className="h-full origin-left bg-white transition-transform duration-300" style={{ transform: `scaleX(${progress})` }} />
         </div>
+        <span className="text-xs tabular-nums text-white/70">{Math.floor(progress * 100)}%</span>
+        {error ? <><p role="alert" className="text-sm">{error}</p><button className="btn-cta rounded-full px-6 py-3" onClick={retry}>Retry loading</button></> : startAnimation ? <button className="btn-cta rounded-full px-6 py-3" onClick={startAnimation}>Start animation</button> : <p role="status" className="text-sm text-white/70">Preparing your experience…</p>}
       </div>
-    </BootContext.Provider>
-  );
+    </div>
+  </BootContext.Provider>;
 }

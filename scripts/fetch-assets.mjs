@@ -1,39 +1,6 @@
-/**
- * Builds the background video the site is designed around.
- *
- *   node scripts/fetch-assets.mjs          # build anything missing
- *   node scripts/fetch-assets.mjs --force  # rebuild everything
- *
- * The source is an 18.2MB 1928x1072 clip on CloudFront — a humanoid robot
- * standing in a field of light. It is
- * downloaded once into a gitignored scratch directory; only the processed
- * output lives in the repo.
- *
- * THREE RENDITIONS, ONE PER VIEWPORT CLASS. The previous version shipped the
- * desktop file as a lossless remux (`-c:v copy`), which meant every visitor
- * downloaded the raw source: 18.2MB at 12,066 kb/s, roughly six times a normal
- * web hero. Playback outran the download and the film stalled mid-loop. The
- * quality was real and nobody could see it, because the clip sits behind a
- * scrim, a vignette and a dimmer.
- *
- * FILENAMES ARE A CACHE CONTRACT. next.config.ts serves /video/* as
- * `public, max-age=31536000, immutable`, and these names carry no content
- * hash. A browser that has fetched `hero-1920.mp4` will not ask again for a
- * year. So: re-encoding in place ships nothing to anyone who has already
- * visited. Any future change to the encode MUST also change the filename —
- * bump to `hero-1920.v2.mp4` or similar and update <VideoField>.
- *
- * Two encoder flags are doing real work and should not be dropped:
- *
- * - `-movflags +faststart` relocates the moov atom to the front of the file.
- *   Without it the browser has to buffer the entire clip before it can show a
- *   single frame, which defeats the whole point of compressing it.
- * - `-an` strips audio. The clip has none worth keeping, and a silent track
- *   still costs bytes and can trip autoplay heuristics.
- *
- * ffmpeg comes from `ffmpeg-static` (a devDependency). It is GPL-3.0: we only
- * invoke the stock binary as a build tool, and the encoded videos are data
- * rather than derivative works, so nothing propagates into the shipped site.
+/** Build versioned, higher-quality hero assets from the original source.
+ * Run node scripts/fetch-assets.mjs. Use --force only to redownload/rebuild.
+ * Changed encodes require new filenames because /video has immutable caching.
  */
 
 import { execFile } from "node:child_process";
@@ -92,19 +59,7 @@ async function download() {
   }
 }
 
-/**
- * Shared encoder settings. Notes on the non-obvious ones:
- *
- * - `-profile:v high` rather than the source's Main. The source encoder
- *   (h264_slapi) chose Main@L5.0, which gives up CABAC and the 8x8 transform —
- *   precisely the tools that pay for themselves on fine foliage and haze.
- * - `-preset slow` buys roughly 10% bitrate over `medium` for build time we
- *   spend once and visitors never do.
- * - `-g 48` is a keyframe every 2s at 24fps, so the loop seam is clean and the
- *   browser can start decoding quickly from a fresh range request.
- * - `-maxrate`/`-bufsize` cap the peak. CRF alone is unbounded on a hard
- *   scene, and an unbounded peak is what stalls playback on a slow link.
- */
+/** H.264 High / yuv420p, slow encoding, bounded peaks, 2-second keyframes. */
 const BASE = (crf, maxrate) => [
   "-c:v", "libx264",
   "-profile:v", "high",
@@ -116,44 +71,24 @@ const BASE = (crf, maxrate) => [
   "-g", "48",
 ];
 
-/**
- * CRF 24 was chosen by measurement, not taste. Sweep against the source at
- * 1920, scored with SSIM (`ffmpeg ... ssim`):
- *
- *   crf 20 .......... 6.99MB   (over budget)
- *   crf 22 .......... 5.30MB   ssim 0.9933   (over budget)
- *   crf 24 .......... 3.96MB   ssim 0.9918   <-- chosen
- *   crf 26 .......... 2.99MB   ssim 0.9900
- *   crf 24 + aq3 .... 4.04MB   ssim 0.9919   (+2% size, +0.0001 ssim: not worth it)
- *
- * Anything at 0.99+ is indistinguishable from the source in motion. CRF 24 is
- * the point where the file fits its budget with quality still well clear of
- * where artefacts become findable on a paused frame — and it is a 4.6x
- * reduction on the 18.16MB the site used to ship.
- *
- * If you re-tune these, re-run the sweep rather than nudging the number.
- */
 const RENDITIONS = [
   {
-    // Desktop, 1440px viewports and up.
-    name: "hero-1920.mp4",
-    args: ["-vf", "scale=1920:-2", ...BASE(24, "5M")],
-    maxBytes: 4_500_000,
+    // Full-resolution rendition for large, tall, or high-DPR surfaces.
+    name: "hero-1920.v2.mp4",
+    args: ["-vf", "scale=1920:-2", ...BASE(20, "8M")],
+    maxBytes: 8_000_000,
   },
   {
-    // Laptops and tablets. 1280-1439 is a very common viewport band and was
-    // previously served the full 18MB file.
-    name: "hero-1280.mp4",
-    args: ["-vf", "scale=1280:-2", ...BASE(24, "3M")],
-    maxBytes: 2_500_000,
+    // Intermediate object-cover surfaces.
+    name: "hero-1280.v2.mp4",
+    args: ["-vf", "scale=1280:-2", ...BASE(20, "5M")],
+    maxBytes: 5_000_000,
   },
   {
-    // Phones. A 390px-wide screen cannot resolve 1080p detail. This tier used
-    // to be CRF 26 and came in at 21% of its budget, so it can afford to look
-    // better while everything else gets smaller.
-    name: "hero-960.mp4",
-    args: ["-vf", "scale=960:-2", ...BASE(25, "2M")],
-    maxBytes: 1_500_000,
+    // Small surfaces only; portrait phones often need the full-resolution tier.
+    name: "hero-960.v2.mp4",
+    args: ["-vf", "scale=960:-2", ...BASE(20, "3M")],
+    maxBytes: 3_000_000,
   },
 ];
 
@@ -187,9 +122,9 @@ async function encode({ name, args, maxBytes }) {
 }
 
 async function poster() {
-  const dest = join(OUT, "hero-poster.jpg");
+  const dest = join(OUT, "hero-poster.v2.jpg");
   if (!force && (await sizeOf(dest)) !== null) {
-    console.log(`  skip  hero-poster.jpg`);
+    console.log(`  skip  hero-poster.v2.jpg`);
     return;
   }
   // Sampled a little into the clip rather than at 0s: the very first frame
@@ -200,10 +135,10 @@ async function poster() {
     "-i", SOURCE,
     "-frames:v", "1",
     "-vf", "scale=1920:-2",
-    "-q:v", "4",
+    "-q:v", "2",
     dest,
   ], { maxBuffer: 1 << 26 });
-  console.log(`  make  hero-poster.jpg (${((await sizeOf(dest)) / 1024).toFixed(0)}KB)`);
+  console.log(`  make  hero-poster.v2.jpg (${((await sizeOf(dest)) / 1024).toFixed(0)}KB)`);
 }
 
 console.log("Building background video\n");
@@ -213,7 +148,7 @@ await download();
 for (const rendition of RENDITIONS) await encode(rendition);
 await poster();
 
-const SHIPPED = [...RENDITIONS.map((r) => r.name), "hero-poster.jpg"];
+const SHIPPED = [...RENDITIONS.map((r) => r.name), "hero-poster.v2.jpg"];
 const shipped = await Promise.all(SHIPPED.map((f) => sizeOf(join(OUT, f))));
 const total = shipped.reduce((a, b) => a + (b ?? 0), 0);
 console.log(`\nDone — ${(total / 1048576).toFixed(2)}MB shipped in public/video.`);

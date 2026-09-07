@@ -50,3 +50,7 @@ next-env.d.ts
 # A separate application that happens to live inside this folder. Not part of
 # Gratia: excluded so it is never committed and never uploaded in a deploy.
 ws-eng-event-ticketing-assessment/
+
+# Local browser verification artifacts
+/.playwright-cli/
+/output/playwright/

@@ -29,7 +29,7 @@ export function Footer() {
             alt="Established online - Public launch record"
             width={255}
             height={55}
-            loading="lazy"
+            loading="eager"
             decoding="async"
           />
         </a>

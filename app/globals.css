@@ -271,3 +271,8 @@ select {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Keep the testimonial train at its initial position until assets are ready. */
+[data-page-ready="false"] .train {
+  animation-play-state: paused;
+}
