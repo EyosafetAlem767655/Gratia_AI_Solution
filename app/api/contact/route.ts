@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { clientIp, createRateLimit } from "@/lib/rate-limit";
 import { sendTelegramMessage } from "@/lib/telegram/api";
 
 /**
@@ -29,30 +30,12 @@ const Enquiry = z.object({
   company: z.string().max(200).optional(),
 });
 
-/**
- * Crude in-memory rate limit, keyed by IP.
- *
- * This is a public route that pushes to the owner's phone, so it needs *some*
- * brake. Being per-instance memory it resets on cold start and does not span
- * serverless instances — it will not stop a determined attacker, only casual
- * flooding. A shared store would be the real fix if this ever gets abused.
- */
-const HITS = new Map<string, number[]>();
-const WINDOW_MS = 60 * 60 * 1000;
-const MAX_PER_WINDOW = 5;
-
-function rateLimited(ip: string) {
-  const now = Date.now();
-  const recent = (HITS.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
-  if (recent.length >= MAX_PER_WINDOW) return true;
-  recent.push(now);
-  HITS.set(ip, recent);
-  return false;
-}
+// This is a public route that pushes to the owner's phone, so it needs *some*
+// brake. See lib/rate-limit.ts for what this does and does not stop.
+const rateLimited = createRateLimit(5, 60 * 60 * 1000);
 
 export async function POST(request: Request) {
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = clientIp(request);
 
   if (rateLimited(ip)) {
     return NextResponse.json(

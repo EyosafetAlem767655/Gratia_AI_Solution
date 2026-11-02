@@ -153,7 +153,14 @@ async function setWebhook() {
 
   // Clear the backlog. Without this, every message sent while the webhook was
   // broken is delivered at once the moment it starts working.
-  await api("setWebhook", { url, drop_pending_updates: "true" });
+  // allowed_updates is explicit: Telegram otherwise keeps whatever list an
+  // earlier setWebhook chose, and the build pipeline's Approve/Reject buttons
+  // arrive as callback_query updates.
+  await api("setWebhook", {
+    url,
+    drop_pending_updates: "true",
+    allowed_updates: JSON.stringify(["message", "callback_query"]),
+  });
 
   const info = await api("getWebhookInfo");
   console.log(info.url === url ? green("\nRegistered.\n") : red("\nDid not take.\n"));

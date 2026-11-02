@@ -5,6 +5,21 @@
     },
     "app/api/ai/process-project/route.ts": {
       "maxDuration": 120
+    },
+    "app/api/builds/callback/route.ts": {
+      "maxDuration": 120
+    },
+    "app/api/albert/answer/route.ts": {
+      "maxDuration": 90
+    },
+    "app/api/albert/start/route.ts": {
+      "maxDuration": 60
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/builds/tick",
+      "schedule": "0 6 * * *"
+    }
+  ]
 }

@@ -54,9 +54,9 @@ export function Contact() {
             </p>
           </Reveal>
           <Reveal>
-            <h1 className="text-3xl font-semibold leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl">
+            <h2 className="text-2xl font-semibold leading-[1.1] tracking-tight sm:text-3xl">
               {CONTACT.headline}
-            </h1>
+            </h2>
           </Reveal>
           <Reveal>
             <p className="mt-4 max-w-md text-base leading-relaxed text-white/70">

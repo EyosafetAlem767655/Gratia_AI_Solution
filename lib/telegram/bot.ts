@@ -1,11 +1,21 @@
-import { eq } from "drizzle-orm";
+import { desc, eq, notInArray } from "drizzle-orm";
 import { processAndSaveProject } from "@/lib/ai/process";
+import {
+  approveBrief,
+  approveDesign,
+  approvePlan,
+  rejectBrief,
+  requestChanges,
+  resume,
+} from "@/lib/builds/orchestrator";
 import { uploadBuffer } from "@/lib/blob";
 import { prepareLogo } from "@/lib/images/logo";
 import { requireDb } from "@/lib/db";
-import { telegramSessions } from "@/lib/db/schema";
+import { builds, telegramSessions } from "@/lib/db/schema";
 import type { TelegramPartialData } from "@/lib/types";
 import {
+  answerCallbackQuery,
+  clearButtons,
   downloadTelegramFile,
   isAdmin,
   sendTelegramMessage,
@@ -20,6 +30,13 @@ type TelegramUpdate = {
     photo?: Array<{ file_id: string; file_size?: number }>;
     document?: { file_id: string; mime_type?: string };
   };
+  /** A tap on an inline button (the build pipeline's approve/reject decisions). */
+  callback_query?: {
+    id: string;
+    from: { id: number };
+    data?: string;
+    message?: { message_id: number; chat: { id: number } };
+  };
 };
 
 const STEPS = {
@@ -28,6 +45,8 @@ const STEPS = {
   LOGO: 2,
   DESCRIPTION: 3,
   TESTIMONIAL: 4,
+  /** Waiting for the owner's feedback text after "Request changes". */
+  BUILD_FEEDBACK: 100,
 } as const;
 
 /**
@@ -43,8 +62,12 @@ const STEPS = {
  * than a clean stack trace in a log nobody is tailing.
  */
 export async function handleTelegramUpdate(update: TelegramUpdate) {
-  const chatId = update.message?.chat.id;
+  const chatId = update.message?.chat.id ?? update.callback_query?.message?.chat.id;
   try {
+    if (update.callback_query) {
+      await routeButton(update.callback_query);
+      return;
+    }
     await route(update);
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
@@ -95,7 +118,7 @@ async function route(update: TelegramUpdate) {
   if (text === "/start") {
     await sendTelegramMessage(
       chatId,
-      "Welcome to Gratia AI Portfolio Bot.\n\nCommands:\n/addproject — Add a new client project\n/cancel — Cancel current wizard",
+      "Welcome to Gratia AI Portfolio Bot.\n\nCommands:\n/addproject — Add a new client project\n/builds — Client builds in progress\n/cancel — Cancel current wizard",
     );
     return;
   }
@@ -112,7 +135,24 @@ async function route(update: TelegramUpdate) {
     return;
   }
 
+  if (text === "/builds") {
+    await sendTelegramMessage(chatId, await describeBuilds());
+    return;
+  }
+
   const session = await getSession(chatId);
+
+  if (session?.step === STEPS.BUILD_FEEDBACK) {
+    const buildId = (session.partialData as TelegramPartialData | null)?.feedbackBuildId;
+    if (!text || !buildId) {
+      await sendTelegramMessage(chatId, "Send your feedback as a text message, or /cancel.");
+      return;
+    }
+    await clearSession(chatId);
+    await sendTelegramMessage(chatId, await requestChanges(buildId, text));
+    return;
+  }
+
   if (!session || session.step === STEPS.IDLE) {
     if (text?.startsWith("/")) {
       await sendTelegramMessage(chatId, "Unknown command. Try /addproject");
@@ -240,6 +280,74 @@ async function route(update: TelegramUpdate) {
       );
     }
   }
+}
+
+/**
+ * Inline-button decisions from the build pipeline.
+ *
+ * callback_data is `<action>:<build id>` (Telegram caps it at 64 bytes). Each
+ * orchestrator call checks the build's current status itself, so a stale
+ * button on an old message is harmless — it just reports "Already handled."
+ */
+const BUTTONS: Record<string, (buildId: string) => Promise<string>> = {
+  ab: approveBrief,
+  rj: rejectBrief,
+  ad: approveDesign,
+  sb: approvePlan,
+  rs: resume,
+};
+
+async function routeButton(query: NonNullable<TelegramUpdate["callback_query"]>) {
+  if (!isAdmin(query.from.id)) {
+    await answerCallbackQuery(query.id, "Not allowed.");
+    return;
+  }
+
+  const [action, buildId] = (query.data ?? "").split(":");
+  const chatId = query.message?.chat.id;
+  if (!buildId || chatId === undefined) {
+    await answerCallbackQuery(query.id);
+    return;
+  }
+
+  if (action === "ch") {
+    await answerCallbackQuery(query.id);
+    await setSession(chatId, STEPS.BUILD_FEEDBACK, { feedbackBuildId: buildId });
+    await sendTelegramMessage(chatId, "What should change? Reply with your feedback (or /cancel).");
+    return;
+  }
+
+  const handler = BUTTONS[action];
+  if (!handler) {
+    await answerCallbackQuery(query.id, "Unknown action.");
+    return;
+  }
+
+  // Acknowledge first: Telegram shows a spinner until it is answered, and some
+  // actions (creating a repo) take longer than its patience.
+  await answerCallbackQuery(query.id, "Working…");
+  const result = await handler(buildId);
+  if (query.message) {
+    await clearButtons(chatId, query.message.message_id).catch(() => {});
+  }
+  await sendTelegramMessage(chatId, result);
+}
+
+async function describeBuilds() {
+  const rows = await requireDb()
+    .select()
+    .from(builds)
+    .where(notInArray(builds.status, ["delivered", "rejected"]))
+    .orderBy(desc(builds.updatedAt))
+    .limit(15);
+  if (rows.length === 0) return "No builds in progress.";
+  return rows
+    .map((b) => {
+      const phase = b.totalPhases ? ` · phase ${b.currentPhase}/${b.totalPhases}` : "";
+      const queued = b.pendingDispatch ? " · queued" : b.inFlight ? " · running" : "";
+      return `• ${b.repoName ?? b.id.slice(0, 8)} — ${b.status}${phase}${queued} · ${b.actionsMinutes} min`;
+    })
+    .join("\n");
 }
 
 async function getSession(chatId: number) {

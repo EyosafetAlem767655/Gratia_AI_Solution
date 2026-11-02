@@ -69,7 +69,48 @@ export const INDUSTRIES = [
 
 export const CONTACT = {
   eyebrow: "Contact",
-  headline: "Tell us what you need",
+  headline: "Prefer a quick message?",
   body: "Describe the problem in your own words — you do not need to know what the solution is called. We read and reply to everything.",
   email: "eyosafetalem@gmail.com",
 } as const;
+
+/**
+ * Albert, the interviewer on /contact. Same rule as the rest of this file:
+ * plain words. The person talking to Albert may never have bought software.
+ */
+export const ALBERT = {
+  eyebrow: "Talk to Albert",
+  headline: "Talk to our smartest AI, Albert",
+  body: "Albert asks the questions a senior engineer would ask, a few at a time, in plain language. When he understands your problem, our team reviews it and designs a solution for you.",
+  greeting: "Hello, I'm Albert. What is your issue or problem? Tell me in as much detail as you like.",
+  placeholder:
+    "For example: we take orders by phone and WhatsApp, write them in a notebook, and keep losing track of who has paid…",
+  start: "Start",
+  continue: "Continue",
+  thinking: "Albert is thinking…",
+  other: "Other",
+  otherPlaceholder: "Type your answer",
+  textPlaceholder: "Type your answer",
+  doneHeadline: "Thank you — Albert has everything he needs.",
+  signupNote:
+    "Create a free account so we can send you updates and deliver your project. Your request is sent to our team the moment you sign up.",
+  signupCta: "Sign up to send your request",
+  submit: "Send to the Gratia team",
+  submitting: "Sending…",
+  startOver: "Start a new conversation",
+} as const;
+
+/** Plain-language names for each build status, shown on the client's status page. */
+export const BUILD_STATUS: Record<string, { label: string; detail: string }> = {
+  awaiting_approval: { label: "In review", detail: "Our team is reading your request." },
+  rejected: { label: "Not accepted", detail: "We can't take this project on right now. We'll email you." },
+  designing: { label: "Designing", detail: "Our engineers are designing the system for you." },
+  clarifying: { label: "Questions for you", detail: "Albert needs a few more answers before we continue." },
+  design_review: { label: "Design review", detail: "The design is ready and our team is checking it." },
+  planning: { label: "Planning", detail: "We're breaking the build into clear steps." },
+  plan_review: { label: "Plan review", detail: "The build plan is being approved." },
+  building: { label: "Building", detail: "Your project is being built, step by step." },
+  paused: { label: "Short pause", detail: "We're pausing briefly for AI usage limits. Work resumes automatically." },
+  delivered: { label: "Delivered", detail: "Your project is ready." },
+  failed: { label: "Delayed", detail: "We hit a problem and our team is fixing it." },
+};

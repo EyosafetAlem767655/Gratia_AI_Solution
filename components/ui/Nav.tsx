@@ -24,6 +24,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { authClient } from "@/lib/auth-client";
 import { SectionLink } from "@/components/ui/SectionLink";
 import type { SectionPath } from "@/lib/scroll";
 
@@ -39,6 +40,7 @@ export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const [seenPath, setSeenPath] = useState(pathname);
+  const { data: session } = authClient.useSession();
 
   // Any navigation closes the drawer — including back/forward, which no click
   // handler sees. Without it the drawer stays open behind the new page with
@@ -100,6 +102,15 @@ export function Nav() {
               </SectionLink>
             ))}
           </div>
+
+          {session?.user && (
+            <Link
+              href="/projects"
+              className="glass flex items-center self-stretch rounded-full px-5 text-sm font-medium text-white/85 transition-colors hover:text-white"
+            >
+              Your projects
+            </Link>
+          )}
 
           <Link
             href="/contact"
@@ -171,6 +182,15 @@ export function Nav() {
             transition: "opacity 400ms ease 300ms, transform 400ms ease 300ms",
           }}
         >
+          {session?.user && (
+            <Link
+              href="/projects"
+              onClick={() => setOpen(false)}
+              className="mb-3 block w-full rounded-full bg-white/10 py-3 text-center text-sm font-medium"
+            >
+              Your projects
+            </Link>
+          )}
           <Link
             href="/contact"
             onClick={() => setOpen(false)}

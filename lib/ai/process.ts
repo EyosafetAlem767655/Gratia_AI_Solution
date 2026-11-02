@@ -1,5 +1,6 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
 import { z } from "zod";
+import { generateJson } from "@/lib/ai/gemini";
 import { requireDb } from "@/lib/db";
 import { projects } from "@/lib/db/schema";
 import type { StructuredProject } from "@/lib/types";
@@ -131,52 +132,20 @@ testimonialHighlight must be a fragment quoted verbatim from the testimonial.
 rotationSpeed must be between 0.1 and 1. scale must be between 0.5 and 2.
 Colours are hex values from the brand palette: #F59E0B gold, #FBBF24 amber, #8B5CF6 violet, #0F172A navy.`;
 
-function getGemini() {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not configured");
-  }
-  return new GoogleGenAI({ apiKey });
-}
-
 export async function structureProjectWithAI(input: {
   companyName: string;
   description: string;
   testimonial: string;
 }): Promise<StructuredProject> {
-  const ai = getGemini();
-
-  let response;
-  try {
-    response = await ai.models.generateContent({
-      model: MODEL,
-      contents: JSON.stringify(input),
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseSchema: RESPONSE_SCHEMA,
-        // Low but not zero: this is extraction, not invention.
-        temperature: 0.3,
-      },
-    });
-  } catch (error) {
-    // A wrong or retired model id surfaces as a 404 from the API, which is
-    // otherwise reported as an opaque failure in the bot's chat message.
-    const message = error instanceof Error ? error.message : String(error);
-    if (message.includes("404") || message.toLowerCase().includes("not found")) {
-      throw new Error(
-        `Gemini model "${MODEL}" was not found for this API key. Set GEMINI_MODEL to a model your key can use.`,
-      );
-    }
-    throw error;
-  }
-
-  const raw = response.text;
-  if (!raw) {
-    throw new Error("Gemini returned an empty response");
-  }
-
-  return structuredProjectSchema.parse(JSON.parse(raw));
+  return generateJson({
+    model: MODEL,
+    systemInstruction: SYSTEM_INSTRUCTION,
+    contents: JSON.stringify(input),
+    responseSchema: RESPONSE_SCHEMA,
+    schema: structuredProjectSchema,
+    // Low but not zero: this is extraction, not invention.
+    temperature: 0.3,
+  });
 }
 
 export async function processAndSaveProject(input: {

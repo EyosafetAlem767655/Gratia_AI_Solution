@@ -1,0 +1,210 @@
+# Gratia build pipeline — one run per stage.
+#
+# Dispatched by the Gratia site (lib/github.ts) after the owner approves in
+# Telegram. Never triggered by issues, comments or pushes: the only way in is
+# workflow_dispatch with a token that can write to this org.
+#
+# SECURITY
+# - The prompt is fixed text below. Client words reach Claude only as
+#   .gratia/brief.json and .gratia/answers.json, both written by Albert and
+#   read by the owner first; CLAUDE.md tells Claude they are data.
+# - Inputs are validated before use and passed through env, never pasted into
+#   a shell script.
+# - Claude gets file tools and a short list of Bash commands. No web access.
+# - VERCEL_TOKEN and BUILD_CALLBACK_SECRET exist only in the steps after
+#   Claude has finished.
+#
+# Org secrets required: CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`),
+# VERCEL_TOKEN, BUILD_CALLBACK_SECRET, GRATIA_CALLBACK_URL. Optional org
+# variable: VERCEL_SCOPE (team slug).
+
+name: gratia
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: design | plan | build
+        required: true
+        type: choice
+        options: [design, plan, build]
+      phase:
+        description: Build phase number (build stage only)
+        required: false
+        default: "0"
+      build_id:
+        description: Gratia build id
+        required: true
+
+concurrency:
+  group: gratia-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      STAGE: ${{ inputs.stage }}
+      PHASE: ${{ inputs.phase }}
+      BUILD_ID: ${{ inputs.build_id }}
+    steps:
+      - name: Validate inputs
+        run: |
+          set -euo pipefail
+          [[ "$STAGE" =~ ^(design|plan|build)$ ]] || { echo "bad stage"; exit 1; }
+          [[ "$PHASE" =~ ^[0-9]{1,2}$ ]] || { echo "bad phase"; exit 1; }
+          [[ "$BUILD_ID" =~ ^[0-9a-f-]{36}$ ]] || { echo "bad build id"; exit 1; }
+          echo "STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Choose prompt
+        id: prompt
+        run: |
+          set -euo pipefail
+          case "$STAGE" in
+            design)
+              text="You are in the DESIGN stage. Follow the Design stage rules in CLAUDE.md exactly. Read .gratia/brief.json, plus .gratia/answers.json and .gratia/owner-feedback.md if they exist. Either write docs/ARCHITECTURE.md and docs/architecture.mmd, or, only if essential information is missing, write .gratia/questions.json and nothing else."
+              ;;
+            plan)
+              text="You are in the PLAN stage. Follow the Plan stage rules in CLAUDE.md exactly. Read .gratia/brief.json, docs/ARCHITECTURE.md, and .gratia/owner-feedback.md if it exists. Write .gratia/plan.json and docs/PLAN.md. Do not write application code."
+              ;;
+            build)
+              text="You are in the BUILD stage, phase ${PHASE}. Follow the Build stage rules in CLAUDE.md exactly. Implement ONLY phase ${PHASE} from .gratia/plan.json, building on the work recorded in .gratia/progress.md. Update .gratia/progress.md when done."
+              ;;
+          esac
+          {
+            echo "text<<GRATIA_EOF"
+            echo "$text"
+            echo "GRATIA_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Claude
+        id: claude
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: ${{ steps.prompt.outputs.text }}
+          claude_args: |
+            --max-turns 150
+            --allowedTools "Read,Write,Edit,MultiEdit,Glob,Grep,LS,TodoWrite,Bash(npm:*),Bash(npx:*),Bash(node:*),Bash(ls:*),Bash(mkdir:*),Bash(cat:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*)"
+            --disallowedTools "WebFetch,WebSearch"
+
+      - name: Classify outcome
+        id: outcome
+        env:
+          CONCLUSION: ${{ steps.claude.outputs.conclusion }}
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: |
+          set -uo pipefail
+          outcome=failed
+          if [ "$CONCLUSION" = "success" ]; then
+            outcome=success
+          elif [ -n "$EXECUTION_FILE" ] && [ -f "$EXECUTION_FILE" ] && \
+               grep -qiE "usage limit|rate[ _-]?limit|limit reached|429|overloaded" "$EXECUTION_FILE"; then
+            # The subscription's usage window ran out. Not a failure: the site
+            # pauses the build and retries later.
+            outcome=limited
+          fi
+          echo "value=$outcome" >> "$GITHUB_OUTPUT"
+          echo "Outcome: $outcome"
+
+      - name: Render architecture diagram
+        if: inputs.stage == 'design' && hashFiles('docs/architecture.mmd') != ''
+        continue-on-error: true
+        run: |
+          echo '{"args":["--no-sandbox"]}' > /tmp/puppeteer.json
+          npx -y @mermaid-js/mermaid-cli@11 -p /tmp/puppeteer.json \
+            -i docs/architecture.mmd -o docs/architecture.png -b white -w 1800
+
+      - name: Commit
+        env:
+          OUTCOME: ${{ steps.outcome.outputs.value }}
+        run: |
+          set -euo pipefail
+          # Owner feedback is written for exactly one re-run. Once that run has
+          # succeeded it must not leak into the next stage.
+          if [ "$OUTCOME" = "success" ]; then rm -f .gratia/owner-feedback.md; fi
+          git config user.name "gratia-builder"
+          git config user.email "builder@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            label="$STAGE"; [ "$STAGE" = "build" ] && label="build phase $PHASE"
+            git commit -m "gratia: $label"
+            git push origin HEAD:main
+          fi
+
+      - name: Deploy preview
+        id: deploy
+        if: inputs.stage == 'build' && steps.outcome.outputs.value == 'success' && hashFiles('package.json') != ''
+        continue-on-error: true
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_SCOPE: ${{ vars.VERCEL_SCOPE }}
+        run: |
+          set -uo pipefail
+          # --prod: the project's production URL is public, while preview URLs
+          # sit behind Vercel's login by default — no use to a client.
+          args=(deploy --prod --yes --token "$VERCEL_TOKEN")
+          [ -n "$VERCEL_SCOPE" ] && args+=(--scope "$VERCEL_SCOPE")
+          npx -y vercel@latest "${args[@]}" > /tmp/vercel.log 2>&1
+          status=$?
+          cat /tmp/vercel.log
+          # Prefer the stable alias (https://<project>.vercel.app) over the
+          # per-deployment URL, which is protected.
+          url=$(grep -oE 'Aliased: https://[^ ]+' /tmp/vercel.log | tail -1 | sed 's/^Aliased: //')
+          [ -z "$url" ] && url=$(grep -oE 'https://[a-z0-9.-]+\.vercel\.app' /tmp/vercel.log | tail -1)
+          echo "url=${url:-}" >> "$GITHUB_OUTPUT"
+          exit $status
+
+      - name: Report back to Gratia
+        if: always()
+        env:
+          BUILD_CALLBACK_SECRET: ${{ secrets.BUILD_CALLBACK_SECRET }}
+          GRATIA_CALLBACK_URL: ${{ secrets.GRATIA_CALLBACK_URL }}
+          OUTCOME: ${{ steps.outcome.outputs.value || 'failed' }}
+          PREVIEW_URL: ${{ steps.deploy.outputs.url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          set -euo pipefail
+          read_or_empty() { [ -f "$1" ] && cat "$1" || true; }
+          minutes=$(( ( $(date +%s) - ${STARTED_AT:-$(date +%s)} + 59 ) / 60 ))
+
+          read_or_empty docs/ARCHITECTURE.md > /tmp/design.md
+          read_or_empty .gratia/plan.json > /tmp/plan.json
+          read_or_empty .gratia/questions.json > /tmp/questions.json
+          if [ -f docs/architecture.png ]; then base64 -w0 docs/architecture.png > /tmp/diagram.b64; else : > /tmp/diagram.b64; fi
+
+          # Only the files this stage produced.
+          [ "$STAGE" = "design" ] || { : > /tmp/design.md; : > /tmp/diagram.b64; : > /tmp/questions.json; }
+          [ "$STAGE" = "plan" ] || : > /tmp/plan.json
+
+          jq -n \
+            --arg build_id "$BUILD_ID" --arg repo "$REPO" --arg stage "$STAGE" \
+            --arg phase "$PHASE" --arg outcome "$OUTCOME" --arg minutes "$minutes" \
+            --arg run_url "$RUN_URL" --arg preview_url "${PREVIEW_URL:-}" \
+            --rawfile design_md /tmp/design.md --rawfile plan_json /tmp/plan.json \
+            --rawfile questions_json /tmp/questions.json --rawfile diagram /tmp/diagram.b64 \
+            '{build_id:$build_id, repo:$repo, stage:$stage, phase:$phase, outcome:$outcome,
+              minutes:$minutes, run_url:$run_url, preview_url:$preview_url,
+              design_md:$design_md, plan_json:$plan_json, questions_json:$questions_json,
+              diagram_png_base64:$diagram}' > /tmp/payload.json
+
+          sig=$(openssl dgst -sha256 -hmac "$BUILD_CALLBACK_SECRET" -hex < /tmp/payload.json | sed 's/^.* //')
+          curl --fail-with-body -sS -X POST "$GRATIA_CALLBACK_URL" \
+            -H "Content-Type: application/json" \
+            -H "x-gratia-signature: $sig" \
+            --data-binary @/tmp/payload.json

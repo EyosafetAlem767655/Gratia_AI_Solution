@@ -1,4 +1,12 @@
+import { existsSync } from "node:fs";
 import { defineConfig } from "drizzle-kit";
+
+// drizzle-kit reads no env files, unlike `next dev`. The keys live in
+// .env.local (from `vercel env pull`), so load it here; variables already set
+// in the shell win, so CI and one-off overrides still work.
+if (existsSync(".env.local")) {
+  process.loadEnvFile(".env.local");
+}
 
 // Prefer a direct (unpooled) connection for migrations; fall back to the pooled
 // URLs the Vercel Neon integration provides (optionally prefixed database_new_).

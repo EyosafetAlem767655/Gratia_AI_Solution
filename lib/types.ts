@@ -57,6 +57,8 @@ export interface TelegramPartialData {
   logoFileId?: string;
   description?: string;
   testimonial?: string;
+  /** Set while the bot is waiting for the owner's "request changes" text. */
+  feedbackBuildId?: string;
 }
 
 export interface IndustryInfo {
