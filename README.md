@@ -132,6 +132,13 @@ Callbacks are HMAC-signed. One run at a time across all clients, because every b
 5. **Telegram:** re-run `node --env-file=.env.local scripts/telegram-doctor.mjs --set` once, so the
    webhook receives button taps (`callback_query`).
 
+### Owner console (`/admin`)
+
+Set `ADMIN_PASSWORD` on Vercel and redeploy. `/admin` lists every conversation with Albert, including
+unfinished and anonymous ones, and opens each one's brief, safety check, interview and build state.
+It is read-only: approvals still happen in Telegram. Sessions last 12 hours, and changing the password
+logs every session out. With no password set, nobody can log in.
+
 ### Limits to know
 
 - **Claude subscription:** builds pause when the usage window runs out and resume on their own.

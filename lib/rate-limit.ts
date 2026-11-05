@@ -17,6 +17,10 @@ export function createRateLimit(maxPerWindow: number, windowMs: number) {
   };
 }
 
+export function ipFrom(headers: Headers) {
+  return headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+}
+
 export function clientIp(request: Request) {
-  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  return ipFrom(request.headers);
 }

@@ -100,6 +100,33 @@ export const ALBERT = {
   startOver: "Start a new conversation",
 } as const;
 
+/** The owner's console at /admin. Not client-facing, so it says what is really happening. */
+export const ADMIN = {
+  stages: {
+    interview: "Talking to Albert",
+    unsent: "Finished, not sent",
+    review: "Waiting on you",
+    working: "Claude working",
+    delivered: "Delivered",
+    stopped: "Rejected",
+  },
+  statuses: {
+    interviewing: "Interviewing",
+    complete: "Not sent",
+    awaiting_approval: "Approve the brief",
+    design_review: "Approve the design",
+    plan_review: "Start the build",
+    failed: "Failed, needs a retry",
+    designing: "Designing",
+    clarifying: "Waiting on client",
+    planning: "Planning",
+    building: "Building",
+    paused: "Paused for usage limit",
+    delivered: "Delivered",
+    rejected: "Rejected",
+  },
+} as const;
+
 /** Plain-language names for each build status, shown on the client's status page. */
 export const BUILD_STATUS: Record<string, { label: string; detail: string }> = {
   awaiting_approval: { label: "In review", detail: "Our team is reading your request." },
